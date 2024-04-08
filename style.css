@@ -1,0 +1,43 @@
+@font-face {
+    font-family: Nightingale;
+    src: url(DTNightingale-Light.ttf);
+}
+
+h1 {
+    font-family: Nightingale;
+}
+
+a {
+    color: rgb(210, 210, 210);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+:root { 
+    background-color: black;
+    color: rgb(210, 210, 210);
+}
+
+.main {
+    padding-left: 20vi;
+    padding-right: 20vi;
+    overflow-y: scroll;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    
+    margin: auto;
+    padding-top: 60px;
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.main::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
+}
