@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="../default.css">
 <script src="../highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
+<title>R2 presigning using Web Crypto</title>
 
 <div class="main">
     <h1>R2 presigning using Web Crypto</h1>
@@ -384,6 +385,8 @@ Processes are not secure. I just told you all the things the browser does, but t
 After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation.
 
 node.js murders v8 sandbox protections. A clean reimplementation is needed.
+
+Apparently Curl even supports SigV4, clever way of avoiding leaking secret key or replay attacks.
 
 Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the
         compiler either.
