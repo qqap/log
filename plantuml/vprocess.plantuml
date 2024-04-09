@@ -24,11 +24,10 @@ node process as p2 #cornsilk {
 node "v8" <<isolate>> as n5
 node "v8" <<isolate>> as n6
 node "v8" <<isolate>> as n7
-label "Same origin tabs" as l1
+label "same-site tabs" as l1
 }
 
 }
-
 
 n5 <- l1
 n6 <-- l1

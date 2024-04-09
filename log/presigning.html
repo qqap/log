@@ -5,61 +5,313 @@
 <script>hljs.highlightAll();</script>
 
 <div class="main">
-<h1>R2 presigning using Web Crypto</h1>
+    <h1>R2 presigning using Web Crypto</h1>
 
+    <p>
+        I was using R2, the S3 compatible bucket by Cloudflare that advertises zero-egress fees.
+    </p>
+
+    <p>
+        A natural use case is to allow third parties to upload content into your bucket for you to manage, index and
+        order. Providing a suitable controlled interface for such is always a bit of a challenge.
+    </p>
+
+    <p>
+        Cloudflare provides an excellent way to run serverless functions called Workers. Standalone they are impressive
+        since they are running as V8 isolates, many in a single process, similar to how Chromium tabs work. In Chromium
+        each process can have multiple V8 isolates running at the same time, however for security considerations is
+        locked to documents from a single site.
+    </p>
+
+    <p>
+        <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none"
+            style="width:min(90%, 600px)" version="1.1" viewBox="0 0 633 273" zoomAndPan="magnify">
+            <defs />
+            <g>
+                <g id="cluster_##2">
+                    <polygon fill="#F0FFF0" points="16,16,26,6,616,6,616,246,606,256,16,256,16,16"
+                        style="stroke:#008000;stroke-width:1.0;" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="606" x2="616" y1="16" y2="6" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="16" x2="606" y1="16" y2="16" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="606" x2="606" y1="16" y2="256" />
+                </g><!--cluster process-->
+                <g id="cluster_process">
+                    <polygon fill="#FFF8DC" points="339,40,349,30,592,30,592,222,582,232,339,232,339,40"
+                        style="stroke:#008000;stroke-width:1.0;" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="582" x2="592" y1="40" y2="30" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="339" x2="582" y1="40" y2="40" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="582" x2="582" y1="40" y2="232" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing"
+                        textLength="63" x="430" y="55.9951">process</text>
+                </g><!--cluster p2-->
+                <g id="cluster_p2">
+                    <polygon fill="#FFF8DC" points="40,40,50,30,315,30,315,222,305,232,40,232,40,40"
+                        style="stroke:#008000;stroke-width:1.0;" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="305" x2="315" y1="40" y2="30" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="40" x2="305" y1="40" y2="40" />
+                    <line style="stroke:#008000;stroke-width:1.0;" x1="305" x2="305" y1="40" y2="232" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing"
+                        textLength="63" x="142" y="55.9951">process</text>
+                </g><!--entity v8-->
+                <g id="elem_v8">
+                    <polygon fill="#BDB76B"
+                        points="355.5,80,365.5,70,460.5,70,460.5,122.5938,450.5,132.5938,355.5,132.5938,355.5,80"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="450.5" x2="460.5" y1="80" y2="70" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="355.5" x2="450.5" y1="80" y2="80" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="450.5" x2="450.5" y1="80" y2="132.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="370.5" y="102.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="395" y="119.292">v8</text>
+                </g><!--entity n2-->
+                <g id="elem_n2">
+                    <polygon fill="#BDB76B"
+                        points="470.5,80,480.5,70,575.5,70,575.5,122.5938,565.5,132.5938,470.5,132.5938,470.5,80"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="565.5" x2="575.5" y1="80" y2="70" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="470.5" x2="565.5" y1="80" y2="80" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="565.5" x2="565.5" y1="80" y2="132.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="485.5" y="102.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="510" y="119.292">v8</text>
+                </g><!--entity n3-->
+                <g id="elem_n3">
+                    <polygon fill="#BDB76B"
+                        points="355.5,163,365.5,153,460.5,153,460.5,205.5938,450.5,215.5938,355.5,215.5938,355.5,163"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="450.5" x2="460.5" y1="163" y2="153" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="355.5" x2="450.5" y1="163" y2="163" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="450.5" x2="450.5" y1="163" y2="215.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="370.5" y="185.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="395" y="202.292">v8</text>
+                </g><!--entity n4-->
+                <g id="elem_n4">
+                    <polygon fill="#BDB76B"
+                        points="470.5,163,480.5,153,575.5,153,575.5,205.5938,565.5,215.5938,470.5,215.5938,470.5,163"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="565.5" x2="575.5" y1="163" y2="153" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="470.5" x2="565.5" y1="163" y2="163" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="565.5" x2="565.5" y1="163" y2="215.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="485.5" y="185.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="510" y="202.292">v8</text>
+                </g><!--entity n5-->
+                <g id="elem_n5">
+                    <polygon fill="#BDB76B"
+                        points="56.5,163,66.5,153,161.5,153,161.5,205.5938,151.5,215.5938,56.5,215.5938,56.5,163"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="161.5" y1="163" y2="153" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="56.5" x2="151.5" y1="163" y2="163" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="151.5" y1="163" y2="215.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="71.5" y="185.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="96" y="202.292">v8</text>
+                </g><!--entity n6-->
+                <g id="elem_n6">
+                    <polygon fill="#BDB76B"
+                        points="187.5,80,197.5,70,292.5,70,292.5,122.5938,282.5,132.5938,187.5,132.5938,187.5,80"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="282.5" x2="292.5" y1="80" y2="70" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="187.5" x2="282.5" y1="80" y2="80" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="282.5" x2="282.5" y1="80" y2="132.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="202.5" y="102.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="227" y="119.292">v8</text>
+                </g><!--entity n7-->
+                <g id="elem_n7">
+                    <polygon fill="#BDB76B"
+                        points="72.5,80,82.5,70,177.5,70,177.5,122.5938,167.5,132.5938,72.5,132.5938,72.5,80"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="167.5" x2="177.5" y1="80" y2="70" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="72.5" x2="167.5" y1="80" y2="80" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="167.5" x2="167.5" y1="80" y2="132.5938" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" font-style="italic"
+                        lengthAdjust="spacing" textLength="65" x="87.5" y="102.9951">&#171;isolate&#187;</text><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16"
+                        x="112" y="119.292">v8</text>
+                </g><!--entity l1-->
+                <g id="elem_l1"><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing"
+                        textLength="107" x="181.5" y="189.4951">same-site tabs</text></g><!--reverse link n5 to l1-->
+                <g id="link_n5_l1">
+                    <path d="M167.664,184.5 C170.911,184.5 168.157,184.5 171.404,184.5 " fill="none" id="n5-backto-l1"
+                        style="stroke:#181818;stroke-width:1.0;" />
+                    <polygon fill="#181818"
+                        points="161.664,184.5,170.664,188.5,166.664,184.5,170.664,180.5,161.664,184.5"
+                        style="stroke:#181818;stroke-width:1.0;" />
+                </g><!--reverse link n6 to l1-->
+                <g id="link_n6_l1">
+                    <path d="M237.7403,139.1116 C237.0433,150.4006 236.649,156.793 236.052,166.455 " fill="none"
+                        id="n6-backto-l1" style="stroke:#181818;stroke-width:1.0;" />
+                    <polygon fill="#181818"
+                        points="238.11,133.123,233.563,141.8594,237.8019,138.1135,241.5478,142.3524,238.11,133.123"
+                        style="stroke:#181818;stroke-width:1.0;" />
+                </g><!--reverse link n7 to l1-->
+                <g id="link_n7_l1">
+                    <path d="M171.4176,136.6805 C186.7496,147.9695 198.731,156.793 211.852,166.455 " fill="none"
+                        id="n7-backto-l1" style="stroke:#181818;stroke-width:1.0;" />
+                    <polygon fill="#181818"
+                        points="166.586,133.123,171.4617,141.6803,170.6123,136.0876,176.205,135.2382,166.586,133.123"
+                        style="stroke:#181818;stroke-width:1.0;" />
+                </g>
+                <!--SRC=[ZP1DYi9048NtVOeYhWMDlukGZOivm9oWaYx6fjkgK1Ld4F7kfgCC3Wp1tUllQnwFiXYuGyKJi7Wowc2vSFOB5JbcM2xS2yrVuUe06b5FUf0a2XzAn9bX6xzKpkn7NbN1965FTGqUDSOZnk1kpeqbiwCmNJpz37KFqgcqP0QpLfGjf0XNUAhYUr_0Iz__5D20omctcd3hlEpla05tvJjpneBDXDjEk9rBs522uXDF11PwWXuRAx9Coxmgdsm3rJm_UJk4Hzezqnq0]-->
+            </g>
+        </svg>
+    </p>
+
+    <p>
+        Ok, not entirely true, but it's a good way to get the point across. Mobile devices that are a bit more resource
+        constrained are somewhat isolated, with several heuristics used, such as sites that are most likely to have
+        user-specific information. 
+        Also, 'same-site' doesn't mean 'same-origin'. since you can technically modify <code>document.domain</code> for
+        relaxing the same-origin policy.
+</p>
 <p>
-I was using R2, the S3 compatible bucket by Cloudflare that advertises zero-egress fees.
+
+What does modifying <code>document.domain</code> do? It allows you to effectively modify the origin at runtime, with the side-effect of making it an unreliable metric to cluster tabs. Why is it there? By allowing a few subdomains to say they are part of the same superdomain, they can easily communicate by 'relaxing' the same-origin hostname where an origin is a complete protocol + hostname + port. Of course, there are weird holes with this approach as you can feel, so Chromium is trying to get rid of it.
 </p>
 
-<p>
-A natural use case is to allow third parties to upload content into your bucket for you to manage, index and order. Providing a suitable controlled interface for such is always a bit of a challenge. 
-</p>
+	<p>Apparently something called eTLDs. Some sample registered eTLDs are</p>
 
-<p>
-Cloudflare provides an excellent way to run serverless functions called Workers. Standalone they are impressive since they are running as V8 isolates, many in a single process, similar to how Chromium tabs work. Chromium groups tabs of the same origin as V8 isolates in the part of the same process, for less overhead.
+<pre><code class="language-plaintext">github.io, blogspot.com, co.uk, blob.core.windows.net, ngrok.app, fool.jp, boyfriend.jp</code></pre>
+       
+    <p>
+	All domains for which subdomains are widely distributed, except maybe the last two. Now they all are treated as separate sites. You might have noticed that <code>co.uk</code> is also there? Yes, it's also a eTLD, the TLD for it is <code>.uk</code>. In fact, <code>.uk</code> wasn't allowed to be registered directly until 2014, no wonder <code>co.uk</code> is so popular.
 
-<a href="https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md">read this</a>
+   </p>
+ <p>
+Webkit follows a simple one process per tab model, where two webpages are never
+        consolidated into the same rendering process, even
+        under high memory pressure and even if they share an eTLD+1 in
+        their URLs. Instead, Safari spawns a new rendering process for each
+        tab until the system runs out of memory.
 
-Partial webkit isolation problems.
+   </p>
 
-Talk about mitigations, but then say let's not get too distracted, from the main point of this post.
+  
 
-</p>
+    <p>
+        Ok, that was quite a tangent, but you learned something new! Hopefully.
+    </p>
 
-<p>
-<?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none" style="width:min(90%, 600px)" version="1.1" viewBox="0 0 647 273" zoomAndPan="magnify"><defs/><g><g id="cluster_##2"><polygon fill="#F0FFF0" points="16,16,26,6,630,6,630,246,620,256,16,256,16,16" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="620" x2="630" y1="16" y2="6"/><line style="stroke:#008000;stroke-width:1.0;" x1="16" x2="620" y1="16" y2="16"/><line style="stroke:#008000;stroke-width:1.0;" x1="620" x2="620" y1="16" y2="256"/></g><!--cluster process--><g id="cluster_process"><polygon fill="#FFF8DC" points="353,40,363,30,606,30,606,222,596,232,353,232,353,40" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="596" x2="606" y1="40" y2="30"/><line style="stroke:#008000;stroke-width:1.0;" x1="353" x2="596" y1="40" y2="40"/><line style="stroke:#008000;stroke-width:1.0;" x1="596" x2="596" y1="40" y2="232"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="63" x="444" y="55.9951">process</text></g><!--cluster p2--><g id="cluster_p2"><polygon fill="#FFF8DC" points="40,40,50,30,329,30,329,222,319,232,40,232,40,40" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="319" x2="329" y1="40" y2="30"/><line style="stroke:#008000;stroke-width:1.0;" x1="40" x2="319" y1="40" y2="40"/><line style="stroke:#008000;stroke-width:1.0;" x1="319" x2="319" y1="40" y2="232"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="63" x="149" y="55.9951">process</text></g><!--entity v8--><g id="elem_v8"><polygon fill="#BDB76B" points="369.5,80,379.5,70,474.5,70,474.5,122.5938,464.5,132.5938,369.5,132.5938,369.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="474.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="369.5" x2="464.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="464.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="384.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="409" y="119.292">v8</text></g><!--entity n2--><g id="elem_n2"><polygon fill="#BDB76B" points="484.5,80,494.5,70,589.5,70,589.5,122.5938,579.5,132.5938,484.5,132.5938,484.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="589.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="484.5" x2="579.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="579.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="499.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="524" y="119.292">v8</text></g><!--entity n3--><g id="elem_n3"><polygon fill="#BDB76B" points="369.5,163,379.5,153,474.5,153,474.5,205.5938,464.5,215.5938,369.5,215.5938,369.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="474.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="369.5" x2="464.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="464.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="384.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="409" y="202.292">v8</text></g><!--entity n4--><g id="elem_n4"><polygon fill="#BDB76B" points="484.5,163,494.5,153,589.5,153,589.5,205.5938,579.5,215.5938,484.5,215.5938,484.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="589.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="484.5" x2="579.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="579.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="499.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="524" y="202.292">v8</text></g><!--entity n5--><g id="elem_n5"><polygon fill="#BDB76B" points="56.5,163,66.5,153,161.5,153,161.5,205.5938,151.5,215.5938,56.5,215.5938,56.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="161.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="56.5" x2="151.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="151.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="71.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="96" y="202.292">v8</text></g><!--entity n6--><g id="elem_n6"><polygon fill="#BDB76B" points="198.5,80,208.5,70,303.5,70,303.5,122.5938,293.5,132.5938,198.5,132.5938,198.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="293.5" x2="303.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="198.5" x2="293.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="293.5" x2="293.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="213.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="238" y="119.292">v8</text></g><!--entity n7--><g id="elem_n7"><polygon fill="#BDB76B" points="83.5,80,93.5,70,188.5,70,188.5,122.5938,178.5,132.5938,83.5,132.5938,83.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="178.5" x2="188.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="83.5" x2="178.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="178.5" x2="178.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="98.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="123" y="119.292">v8</text></g><!--entity l1--><g id="elem_l1"><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="121" x="181.5" y="189.4951">Same origin tabs</text></g><!--reverse link n5 to l1--><g id="link_n5_l1"><path d="M167.732,184.5 C170.972,184.5 168.212,184.5 171.452,184.5 " fill="none" id="n5-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="161.732,184.5,170.732,188.5,166.732,184.5,170.732,180.5,161.732,184.5" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link n6 to l1--><g id="link_n6_l1"><path d="M246.9346,139.0863 C245.6806,150.3753 244.967,156.793 243.894,166.455 " fill="none" id="n6-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="247.597,133.123,242.6278,141.6264,247.045,138.0924,250.5789,142.5096,247.597,133.123" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link n7 to l1--><g id="link_n7_l1"><path d="M180.8415,136.7659 C195.6155,148.0549 207.05,156.793 219.694,166.455 " fill="none" id="n7-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="176.074,133.123,180.7967,141.7657,180.0469,136.1588,185.6539,135.409,176.074,133.123" style="stroke:#181818;stroke-width:1.0;"/></g><!--SRC=[ZOv1Yi9044NtVOeYMGiQHvr5SEDY3k09Akb2cswhGfMZY7ZtIKUH30nXTh_UApxVOk0E5K_0uiceWyNSsHigSiomchiHpQzmTm2Dg2VTIHA5BoNYpB2D1vLlzWElws2Iy4pRBNZK68yOWtiuDvIKHs6wURhsTK_IgRHa1cKhoXPIX3kyL77vB63KzpS5DE1gmYqdt4TUzdj8ZxlgFtE6WjM4Mq-uZKlOK89YZoS2qN0836TihCWwBVAkOTeAwbc-UTs7PzgyqWy0]--></g></svg>
-</p>
+    <p>
+        Cloudflare loves to advertise to use Workers for everything, so they suggest just route all requests to a Worker
+        and let it control the access to your bucket.
+        However, they suffer with the problem of a max request body size of a few hundred MB, so no. I was looking for
+        allowing to upload larger sized content, a few GB. Plus, routing all requests to Workers that I have to spin up
+        and pay for separately didn't sound too appealing.
+    </p>
 
-<p>
-Cloudflare loves to advertise to use Workers for everything, so they suggest just route all requests to a Worker and let it control the access to your bucket.
-However, they suffer with the problem of a max request body size of a few hundred MB, so no. I was looking for allowing to upload larger sized content, a few GB. Plus, routing all requests to Workers that I have to spin up and pay for separately didn't sound too appealing.
-</p>
+    <p>
+        I didn't want to run a separate normal service either. I wanted to keep it simple, and cost efficient.
+    </p>
 
-<p>
-I didn't want to run a separate normal service either. I wanted to keep it simple, elegant, and cost efficient.
-</p>
+    <p>
+        What if there is some way to directly allow the third party person to access operating on R2 without a middle
+        person? Voila, it's called pre-signed URLs. What, how? It's simple. You give a URL that provides temporary
+        access to a resource. Where do you get the URL? You create one with some crypto magic. I can use the Worker
+        to create the pre-signed URL, so that if someone wants to PUT some object into my code they can call the Worker and get the URL to upload to the bucket directly.
+    </p>
 
-<p>
-What if there is some way to directly allow the third party person to upload to R2 without a middle man? Voila, it's called pre-signed URLs. What? It's simple. You give a URL that provides temporary access to a resource.
-</p>
+    <p>
+        <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none"
+            style="width:min(80%, 400px)" version="1.1" viewBox="0 0 452 193" zoomAndPan="magnify">
+            <defs />
+            <g><!--entity b-->
+                <g id="elem_b">
+                    <polygon fill="#BDB76B"
+                        points="16,16.5474,26,6.5474,112,6.5474,112,42.8443,102,52.8443,16,52.8443,16,16.5474"
+                        style="stroke:#008000;stroke-width:0.5;" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="112" y1="16.5474" y2="6.5474" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="16" x2="102" y1="16.5474" y2="16.5474" />
+                    <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="102" y1="16.5474" y2="52.8443" /><text
+                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56"
+                        x="31" y="39.5425">browser</text>
+                </g><!--entity w-->
+                <g id="elem_w">
+                    <path
+                        d="M366.5519,15.8418 C369.969,8.0668 377.3903,7.6601 382.0735,14.4969 C385.1356,6.3593 392.9694,6 398.2037,12.0224 C404.4696,6.2643 410.5106,6.1979 414.1512,14.9148 C418.4041,9.6329 424.1846,9.3208 427.7813,15.6828 C436.7057,18.0682 437.9855,25.452 431.6911,31.5803 C438.2176,36.329 437.6035,43.1345 429.6648,45.8257 C425.8144,54.6486 419.6532,55.9489 412.4888,49.57 C409.6882,58.0357 404.7851,59.6439 397.5675,54.3653 C390.7822,61.5314 385.2959,59.5856 382.32,50.7382 C376.0581,56.0231 370.4936,53.3587 368.6797,45.9561 C359.9692,45.2154 357.1135,38.1664 362.1478,31.3 C355.3321,24.5895 357.8992,18.1453 366.5519,15.8418 "
+                        fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
+                        font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="47" x="373.5"
+                        y="34.5425">worker</text>
+                </g><!--entity bu-->
+                <g id="elem_bu">
+                    <path
+                        d="M30,139.8374 C30,129.8374 64,129.8374 64,129.8374 C64,129.8374 98,129.8374 98,139.8374 L98,165.1343 C98,175.1343 64,175.1343 64,175.1343 C64,175.1343 30,175.1343 30,165.1343 L30,139.8374 "
+                        fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" />
+                    <path d="M30,139.8374 C30,149.8374 64,149.8374 64,149.8374 C64,149.8374 98,149.8374 98,139.8374 "
+                        fill="none" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
+                        font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="48" x="40"
+                        y="166.8325">bucket</text>
+                </g><!--link b to w-->
+                <g id="link_b_w">
+                    <path d="M112.42,29.6874 C178.98,29.6874 291.42,29.6874 352.38,29.6874 " fill="none" id="b-to-w"
+                        style="stroke:#008000;stroke-width:1.0;" />
+                    <polygon fill="#008000"
+                        points="358.38,29.6874,349.38,25.6874,353.38,29.6874,349.38,33.6874,358.38,29.6874"
+                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                        font-size="13" lengthAdjust="spacing" textLength="210" x="130.25" y="22.7543">Requests
+                        pre-signed URL for PUT</text>
+                </g><!--link w to b-->
+                <g id="link_w_b">
+                    <path
+                        d="M358.1,43.6774 C349.53,46.1774 340.42,48.3974 331.75,49.6874 C289.33,56.0474 181.27,55.2874 138.75,49.6874 C130.09,48.5574 126.839,48.1296 118.109,45.9996 "
+                        fill="none" id="w-to-b" style="stroke:#008000;stroke-width:1.0;" />
+                    <polygon fill="#008000"
+                        points="112.28,44.5774,120.0754,50.5967,117.1375,45.7626,121.9716,42.8247,112.28,44.5774"
+                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                        font-size="13" lengthAdjust="spacing" textLength="191" x="139.75" y="45.7543">Sends pre-signed
+                        URL for PUT</text>
+                </g><!--link b to bu-->
+                <g id="link_b_bu">
+                    <path d="M64,53.1274 C64,74.9674 64,101.9274 64,123.5774 " fill="none" id="b-to-bu"
+                        style="stroke:#008000;stroke-width:1.0;" />
+                    <polygon fill="#008000" points="64,129.5774,68,120.5774,64,124.5774,60,120.5774,64,129.5774"
+                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                        font-size="13" lengthAdjust="spacing" textLength="155" x="73" y="95.9043">PUT with pre-signed
+                        URL</text>
+                </g>
+                <!--SRC=[ZOwxRW8n44Nx-OehKIDwjDecI3GK4G6bzcF2MbuyP6pBYgByExj9Yh1LwdlEcUbo-HYv9oVNcoHEPHVCHSqLdmGSGk8d6KMnL-P4NzHjVdcY99vXLLfcXScmM7cZCGuc1dAZL8yc6d_6XfKJJJcCaRmfnfeyoTL5Bjzk_REJnRgVZ2qwDn_VlWwXS7_azygvPDoKrpbS4dkSZmUyJUyzdqyFBBKvOPU95qx-V_xqmXoeom9c52sKOP5veEu0]-->
+            </g>
+        </svg>
+    </p>
 
-<p>
-You know how Instagram delivers your friends photos only to you? You guess correct, it's pre-signed URLs! They also use S3 buckets, you know. Anyway, they need to give you temporary access to get the photo from their bucket, but obviously don't want to burn money routing the photo through their servers, so they sign the URL with some crypto magic, and then voila you are given the URL and the browser is then calling the bucket directly and rendering the image. Try copying the image address and viewing it a few hours later, it will mysteriously no longer show you the photo.
-</p>
+    <p>
+        I better get to implementing the logic to generating this magical URL. Ok, so Cloudflare provides some documentation, curtesy of Kian. 
+    </p>
 
-<p>
-Anyway, now that we know what to do. I better get to implementing the logic to generating the magical URL. I'm using Cloudflare page functions, which are basically Workers that are tweaked to be easier to use with websites. I've got a form for some third party person to generate a pre-signed URL to upload using a PUT action. Apparently, Cloudflare doesn't support pre-signed POST requests as of yet. 
-</p>
-
-<pre>
+    <pre>
 <code>import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))</code>
-</pre>
+console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))</code></pre>
 
-<p>Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the compiler either.
-</p>
+    <p>
+Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>... seems mysterious. I bet it uses some Node.js library internally.
+    </p>
 
-<pre>
+
+    <pre>
+<code>if (this.signerOptions.runtime !== "node")
+     throw new Error("This request requires signing with SigV4Asymmetric algorithm. It's only available in Node.js");
+return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
+      
+   <p>
+Yup, it does. Not suprising. Since Cloudflare Workers run on the V8 engine, they use the Web native APIs.
+
+Wait but node.js also uses V8.
+    </p>
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+    <pre>
 <code>async function HMAC(key, message){
 	if (typeof key === 'string') { key = toByteArray(key); }
 	if (typeof message === 'string') { message = toByteArray(message); }
@@ -121,8 +373,26 @@ async function generatePresignedPutUrl(fileName) {
     const signature = await HMAC(signingKey, stringToSign);
     return `https://${url}/` + fileName + "?" + queryParams + "&X-Amz-Signature=" + toHexString(signature)
 }
-</code>
-</pre>
+</code></pre>
 
+    <p>
+
+Talk about sigv4
+
+Processes are not secure. I just told you all the things the browser does, but then how does cloudflare run v8 isolates?
+
+After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation.
+
+node.js murders v8 sandbox protections. A clean reimplementation is needed.
+
+Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the
+        compiler either.
+        WinterCG but Node.js joined, and compatible, and edge functions, and was cloud front, and you can never escape
+        the wrath of node.js. it will find you, and it will eat your soul. Even the creator of node.js proclaimed their
+        hate for their creation as they embarked on their next adventure of deno, which I also have reservations about,
+        but at least they have their own version of foundation db, that allows for not just checked calls.
+
+        Web frameworks blog, js community can move fast while the platform is about breaking the least
+    </p>
 
 </div>

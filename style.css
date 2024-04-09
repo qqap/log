@@ -49,7 +49,6 @@ a:hover {
 .main pre {
     padding-left: 15vi;
     padding-right: 15vi;
-    padding-top: 1rem;
 
     @media (pointer:none), (pointer:coarse) {
         padding-left: 2vi;

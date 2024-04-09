@@ -1,0 +1,19 @@
+@startuml
+
+<style>
+componentDiagram {
+  LineColor Green
+}
+</style>
+
+
+node browser as b #darkkhaki
+cloud worker as w #cornsilk
+database bucket as bu #cornsilk
+
+b -> w : <color:White>Requests pre-signed URL for PUT<color:White>
+w -> b : <color:White>Sends pre-signed URL for PUT<color:White>
+b --> bu : <color:White>  PUT with pre-signed URL<color:White>
+
+
+@enduml
