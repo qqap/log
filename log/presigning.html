@@ -1,13 +1,129 @@
 <link rel="stylesheet" href="../style.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
 
 <div class="main">
 <h1>R2 presigning using Web Crypto</h1>
 
+<p>
 I was using R2, the S3 compatible bucket by Cloudflare that advertises zero-egress fees.
-A natural usecase is allowing specific people to upload files to a bucket, but of course, without
-giving them full access to the bucket. So let's give them temporary access in terms of a URL that expires.
+</p>
 
-more informal
+<p>
+A natural use case is to allow third parties to upload content into your bucket for you to manage, index and order. Providing a suitable controlled interface for such is always a bit of a challenge. 
+</p>
+
+<p>
+Cloudflare provides an excellent way to run serverless functions called Workers. Standalone they are impressive since they are running as V8 isolates, many in a single process, similar to how Chromium tabs work. Chromium groups tabs of the same origin as V8 isolates in the part of the same process, for less overhead.
+
+<a href="https://chromium.googlesource.com/chromium/src/+/main/docs/process_model_and_site_isolation.md">read this</a>
+
+Partial webkit isolation problems.
+
+Talk about mitigations, but then say let's not get too distracted, from the main point of this post.
+
+</p>
+
+<p>
+<?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none" style="width:min(90%, 600px)" version="1.1" viewBox="0 0 647 273" zoomAndPan="magnify"><defs/><g><g id="cluster_##2"><polygon fill="#F0FFF0" points="16,16,26,6,630,6,630,246,620,256,16,256,16,16" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="620" x2="630" y1="16" y2="6"/><line style="stroke:#008000;stroke-width:1.0;" x1="16" x2="620" y1="16" y2="16"/><line style="stroke:#008000;stroke-width:1.0;" x1="620" x2="620" y1="16" y2="256"/></g><!--cluster process--><g id="cluster_process"><polygon fill="#FFF8DC" points="353,40,363,30,606,30,606,222,596,232,353,232,353,40" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="596" x2="606" y1="40" y2="30"/><line style="stroke:#008000;stroke-width:1.0;" x1="353" x2="596" y1="40" y2="40"/><line style="stroke:#008000;stroke-width:1.0;" x1="596" x2="596" y1="40" y2="232"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="63" x="444" y="55.9951">process</text></g><!--cluster p2--><g id="cluster_p2"><polygon fill="#FFF8DC" points="40,40,50,30,329,30,329,222,319,232,40,232,40,40" style="stroke:#008000;stroke-width:1.0;"/><line style="stroke:#008000;stroke-width:1.0;" x1="319" x2="329" y1="40" y2="30"/><line style="stroke:#008000;stroke-width:1.0;" x1="40" x2="319" y1="40" y2="40"/><line style="stroke:#008000;stroke-width:1.0;" x1="319" x2="319" y1="40" y2="232"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="63" x="149" y="55.9951">process</text></g><!--entity v8--><g id="elem_v8"><polygon fill="#BDB76B" points="369.5,80,379.5,70,474.5,70,474.5,122.5938,464.5,132.5938,369.5,132.5938,369.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="474.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="369.5" x2="464.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="464.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="384.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="409" y="119.292">v8</text></g><!--entity n2--><g id="elem_n2"><polygon fill="#BDB76B" points="484.5,80,494.5,70,589.5,70,589.5,122.5938,579.5,132.5938,484.5,132.5938,484.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="589.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="484.5" x2="579.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="579.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="499.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="524" y="119.292">v8</text></g><!--entity n3--><g id="elem_n3"><polygon fill="#BDB76B" points="369.5,163,379.5,153,474.5,153,474.5,205.5938,464.5,215.5938,369.5,215.5938,369.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="474.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="369.5" x2="464.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="464.5" x2="464.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="384.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="409" y="202.292">v8</text></g><!--entity n4--><g id="elem_n4"><polygon fill="#BDB76B" points="484.5,163,494.5,153,589.5,153,589.5,205.5938,579.5,215.5938,484.5,215.5938,484.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="589.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="484.5" x2="579.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="579.5" x2="579.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="499.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="524" y="202.292">v8</text></g><!--entity n5--><g id="elem_n5"><polygon fill="#BDB76B" points="56.5,163,66.5,153,161.5,153,161.5,205.5938,151.5,215.5938,56.5,215.5938,56.5,163" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="161.5" y1="163" y2="153"/><line style="stroke:#008000;stroke-width:0.5;" x1="56.5" x2="151.5" y1="163" y2="163"/><line style="stroke:#008000;stroke-width:0.5;" x1="151.5" x2="151.5" y1="163" y2="215.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="71.5" y="185.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="96" y="202.292">v8</text></g><!--entity n6--><g id="elem_n6"><polygon fill="#BDB76B" points="198.5,80,208.5,70,303.5,70,303.5,122.5938,293.5,132.5938,198.5,132.5938,198.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="293.5" x2="303.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="198.5" x2="293.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="293.5" x2="293.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="213.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="238" y="119.292">v8</text></g><!--entity n7--><g id="elem_n7"><polygon fill="#BDB76B" points="83.5,80,93.5,70,188.5,70,188.5,122.5938,178.5,132.5938,83.5,132.5938,83.5,80" style="stroke:#008000;stroke-width:0.5;"/><line style="stroke:#008000;stroke-width:0.5;" x1="178.5" x2="188.5" y1="80" y2="70"/><line style="stroke:#008000;stroke-width:0.5;" x1="83.5" x2="178.5" y1="80" y2="80"/><line style="stroke:#008000;stroke-width:0.5;" x1="178.5" x2="178.5" y1="80" y2="132.5938"/><text fill="#000000" font-family="sans-serif" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="65" x="98.5" y="102.9951">&#171;isolate&#187;</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="16" x="123" y="119.292">v8</text></g><!--entity l1--><g id="elem_l1"><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="121" x="181.5" y="189.4951">Same origin tabs</text></g><!--reverse link n5 to l1--><g id="link_n5_l1"><path d="M167.732,184.5 C170.972,184.5 168.212,184.5 171.452,184.5 " fill="none" id="n5-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="161.732,184.5,170.732,188.5,166.732,184.5,170.732,180.5,161.732,184.5" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link n6 to l1--><g id="link_n6_l1"><path d="M246.9346,139.0863 C245.6806,150.3753 244.967,156.793 243.894,166.455 " fill="none" id="n6-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="247.597,133.123,242.6278,141.6264,247.045,138.0924,250.5789,142.5096,247.597,133.123" style="stroke:#181818;stroke-width:1.0;"/></g><!--reverse link n7 to l1--><g id="link_n7_l1"><path d="M180.8415,136.7659 C195.6155,148.0549 207.05,156.793 219.694,166.455 " fill="none" id="n7-backto-l1" style="stroke:#181818;stroke-width:1.0;"/><polygon fill="#181818" points="176.074,133.123,180.7967,141.7657,180.0469,136.1588,185.6539,135.409,176.074,133.123" style="stroke:#181818;stroke-width:1.0;"/></g><!--SRC=[ZOv1Yi9044NtVOeYMGiQHvr5SEDY3k09Akb2cswhGfMZY7ZtIKUH30nXTh_UApxVOk0E5K_0uiceWyNSsHigSiomchiHpQzmTm2Dg2VTIHA5BoNYpB2D1vLlzWElws2Iy4pRBNZK68yOWtiuDvIKHs6wURhsTK_IgRHa1cKhoXPIX3kyL77vB63KzpS5DE1gmYqdt4TUzdj8ZxlgFtE6WjM4Mq-uZKlOK89YZoS2qN0836TihCWwBVAkOTeAwbc-UTs7PzgyqWy0]--></g></svg>
+</p>
+
+<p>
+Cloudflare loves to advertise to use Workers for everything, so they suggest just route all requests to a Worker and let it control the access to your bucket.
+However, they suffer with the problem of a max request body size of a few hundred MB, so no. I was looking for allowing to upload larger sized content, a few GB. Plus, routing all requests to Workers that I have to spin up and pay for separately didn't sound too appealing.
+</p>
+
+<p>
+I didn't want to run a separate normal service either. I wanted to keep it simple, elegant, and cost efficient.
+</p>
+
+<p>
+What if there is some way to directly allow the third party person to upload to R2 without a middle man? Voila, it's called pre-signed URLs. What? It's simple. You give a URL that provides temporary access to a resource.
+</p>
+
+<p>
+You know how Instagram delivers your friends photos only to you? You guess correct, it's pre-signed URLs! They also use S3 buckets, you know. Anyway, they need to give you temporary access to get the photo from their bucket, but obviously don't want to burn money routing the photo through their servers, so they sign the URL with some crypto magic, and then voila you are given the URL and the browser is then calling the bucket directly and rendering the image. Try copying the image address and viewing it a few hours later, it will mysteriously no longer show you the photo.
+</p>
+
+<p>
+Anyway, now that we know what to do. I better get to implementing the logic to generating the magical URL. I'm using Cloudflare page functions, which are basically Workers that are tweaked to be easier to use with websites. I've got a form for some third party person to generate a pre-signed URL to upload using a PUT action. Apparently, Cloudflare doesn't support pre-signed POST requests as of yet. 
+</p>
+
+<pre>
+<code>import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))
+</code>
+</pre>
+
+<p>Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the compiler either.
+</p>
+
+<pre>
+<code>async function HMAC(key, message){
+	if (typeof key === 'string') { key = toByteArray(key); }
+	if (typeof message === 'string') { message = toByteArray(message); }
+	return await crypto.subtle.sign('HMAC', 
+        await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, true, ['sign']), 
+        message);
+}
+
+function toHexString(byteArray) {
+    return Array.from(new Uint8Array(byteArray)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+function toByteArray(str) {
+    var byteArray = new Uint8Array(str.length);
+    for (var i = 0; i < str.length; i++) {
+        byteArray[i] = str.charCodeAt(i);
+    }
+    return byteArray;
+}
+
+async function generatePresignedPutUrl(fileName) {
+
+    const date = new Date();
+    const dateIso = date.toISOString().replace(/:/g, "").replace(/-/g, "").replace(/\./g, "").slice(0, -4) + "Z";
+    const dateShort = dateIso.split("T")[0];
+
+    const url = "«bucketname.accountid.r2.cloudflarestorage.com»"
+    const accessKey = "«accesskey»"
+    const secretAccessKey = "«secretaccesskey»"
+    const region = "auto"
+    const service = "s3"
+
+    const canonicalHeaders = "host:" + url 
+	const queryParams = "X-Amz-Algorithm=AWS4-HMAC-SHA256" + "&X-Amz-Content-Sha256=" + 
+        "UNSIGNED-PAYLOAD" + "&X-Amz-Credential=" + accessKey + "%2F" + dateShort + "%2F" 
+        + region + "%2F" + service + "%2Faws4_request" + "&X-Amz-Date=" 
+        + dateIso + "&X-Amz-Expires=900&X-Amz-SignedHeaders=host&x-id=PutObject"
+   
+    const canonicalRequest = "PUT" + "\n" +
+        "/" + fileName + "\n" +
+        queryParams + "\n" +
+        canonicalHeaders + "\n\n" +
+        "host" + "\n" +
+        "UNSIGNED-PAYLOAD";
+
+    const canonicalRequestDigest = await crypto.subtle.digest("SHA-256", toByteArray(canonicalRequest))
+    const canonicalRequestDigestHex = toHexString(canonicalRequestDigest)
+
+    const stringToSign = "AWS4-HMAC-SHA256" + "\n" +
+        dateIso + "\n" +
+        dateShort + "/" + region + "/" + service + "/aws4_request" + "\n" +
+		canonicalRequestDigestHex;
+		
+    var signingKey = `AWS4${secretAccessKey}`;
+    for (const signable of [dateShort, region, service, "aws4_request"]) {
+        signingKey = await HMAC(signingKey, signable);
+    }
+
+    const signature = await HMAC(signingKey, stringToSign);
+    return `https://${url}/` + fileName + "?" + queryParams + "&X-Amz-Signature=" + toHexString(signature)
+}
+</code>
+</pre>
+
 
 </div>
