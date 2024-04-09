@@ -29,17 +29,32 @@ a:hover {
 
     margin: auto;
     padding-top: 60px;
+
+    @media (pointer:none), (pointer:coarse) {
+        padding-left: 5vi;
+        padding-right: 5vi;
+    }
 }
 
 .main p {
     padding-left: 20vi;
     padding-right: 20vi;
+
+    @media (pointer:none), (pointer:coarse) {
+        padding-left: 5vi;
+        padding-right: 5vi;
+    }
 }
 
 .main pre {
     padding-left: 15vi;
     padding-right: 15vi;
+    padding-top: 1rem;
 
+    @media (pointer:none), (pointer:coarse) {
+        padding-left: 2vi;
+        padding-right: 2vi;
+    }
 }
 
 .main pre code::-webkit-scrollbar { 

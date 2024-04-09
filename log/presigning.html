@@ -53,8 +53,7 @@ Anyway, now that we know what to do. I better get to implementing the logic to g
 
 <pre>
 <code>import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))
-</code>
+console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))</code>
 </pre>
 
 <p>Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the compiler either.
