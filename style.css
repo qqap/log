@@ -30,7 +30,7 @@ a:hover {
     margin: auto;
     padding-top: 60px;
 
-    @media (pointer:none), (pointer:coarse) {
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 5vi;
         padding-right: 5vi;
     }
@@ -40,7 +40,7 @@ a:hover {
     padding-left: 20vi;
     padding-right: 20vi;
 
-    @media (pointer:none), (pointer:coarse) {
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 5vi;
         padding-right: 5vi;
     }
@@ -58,7 +58,7 @@ a:hover {
     padding-left: 15vi;
     padding-right: 15vi;
 
-    @media (pointer:none), (pointer:coarse) {
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 2vi;
         padding-right: 2vi;
     }
@@ -75,7 +75,7 @@ a:hover {
     margin-bottom: 1rem;
     margin-right: 1rem;
 
-    @media (pointer:none), (pointer:coarse) {
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         float: none;
         width: auto;
         margin: auto;
@@ -91,9 +91,9 @@ a:hover {
     /* padding-left: 15vi; */
     padding-right: 15vi;
 
-    @media (pointer:none), (pointer:coarse) {
-        padding-left: 2vi;
-        padding-right: 2vi;
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
+        padding-left: 5vi;
+        padding-right: 5vi;
     }
 
     width: fit-content;
@@ -102,7 +102,7 @@ a:hover {
     margin-bottom: 1rem;
     margin-left: 1rem;
 
-    @media (pointer:none), (pointer:coarse) {
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         float: none;
         width: auto;
         margin: auto;
