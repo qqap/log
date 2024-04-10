@@ -36,7 +36,7 @@ a:hover {
     }
 }
 
-.main p {
+.main p, .main summary {
     padding-left: 20vi;
     padding-right: 20vi;
 
@@ -44,6 +44,14 @@ a:hover {
         padding-left: 5vi;
         padding-right: 5vi;
     }
+}
+
+.main summary {
+    cursor: pointer;
+}
+
+.main details {
+    color: rgb(159, 144, 144);
 }
 
 .main pre {

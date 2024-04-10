@@ -19,10 +19,14 @@
 
     <p>
         Cloudflare provides an excellent way to run serverless functions called Workers. Standalone they are impressive
-        since they are running as V8 isolates, many in a single process, similar to how Chromium tabs work. In Chromium
+        since they are running as V8 isolates, many in a single process, similar to how Chromium tabs work.</p>
+    
+    <details>
+  <summary>Tangent</summary>
+ <p>In Chromium
         each process can have multiple V8 isolates running at the same time, however for security considerations is
-        locked to documents from a single site.
-    </p>
+        locked to documents from a single site.</p>
+
 
     <p>
         <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
@@ -174,7 +178,7 @@
         </p>
 
         <p>
-        So I just said that they are grouped as same-sites. That's since same-origin is defined differently.</p>
+        So I just said that they are grouped as same-sites. That's since origin is defined differently.</p>
 
 <pre><code class="markdown"># Origin:
 
@@ -223,28 +227,23 @@ Webkit just follows a simple one process per tab model instead of dealing with t
         tab until the system runs out of memory.
 
    </p>
-
-    <p>
-    It seems like the browsers don't think that believe that running multiple untrusted tabs in the same process is a good idea? Yes, to mitigate against timing attacks such as Spectre, they rely on the security of processes in the OS instead. So I guess the question is, how does Cloudflare manage to keep 
-    
-    </p>
+   
+   <p>
+   Why do they do this? To place the burden of preventing timing attacks on the OS.
+   </p>
+   </details>
 
     <p>
         Cloudflare loves to advertise to use Workers for everything, so they suggest just route all requests to a Worker
-        and let it control the access to your bucket.
-        However, they suffer with the problem of a max request body size of a few hundred MB, so no. I was looking for
-        allowing to upload larger sized content, a few GB. Plus, routing all requests to Workers that I have to spin up
-        and pay for separately didn't sound too appealing.
-    </p>
-
-    <p>
-        I didn't want to run a separate normal service either. I wanted to keep it simple, and cost efficient.
+        and let it firewall access to your bucket.
+        However, Workers suffer with the problem of a max request body size of a few hundred MB, so it wasn't the right fit. I was looking for
+        allowing to upload larger sized content, a few GB.
     </p>
 
     <p>
         What if there is some way to directly allow the third party person to access operating on R2 without a middle
-        person? Voila, it's called pre-signed URLs. What, how? It's simple. You give a URL that provides temporary
-        access to a resource. Where do you get the URL? You create one with some crypto magic. I can use the Worker
+        person? Voila, it's called pre-signed URLs, a URL that provides temporary
+        access to a resource. Where do you get the URL? You create one with some cryptographic magic. I can use the Worker
         to create the pre-signed URL, so that if someone wants to PUT some object into my code they can call the Worker and get the URL to upload to the bucket directly.
     </p>
 
@@ -313,7 +312,7 @@ Webkit just follows a simple one process per tab model instead of dealing with t
     </p>
 
     <p>
-        I better get to implementing the logic to generating this magical URL. Cloudflare fortunately provides some documentation, courtesy of Kian. 
+        I better get to implementing the logic to generating this magical pre-signed URL. Cloudflare fortunately provides some documentation, courtesy of Kian. 
     </p>
 
     <pre>
@@ -321,7 +320,7 @@ Webkit just follows a simple one process per tab model instead of dealing with t
 console.log(await getSignedUrl(S3, new PutObjectCommand({Bucket: 'my-bucket-name', Key: 'dog.png'}), { expiresIn: 3600 }))</code></pre>
 
     <p>
-Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>... seems mysterious. I bet it uses some Node.js library internally.
+Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>. Seems mysterious! I bet it uses some Node.js library internally.
     </p>
 
 
@@ -331,11 +330,59 @@ Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>... seems m
 return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
       
    <p>
-Yup, it does. Not suprising. Since Cloudflare Workers run on the V8 engine, they use the Web native APIs.
+Yup, it does, not surprising. Let's reimplement it using the native Web Crypto interface.
+</p>
+
+<details><summary>Tangent</summary>
+<p>
+ Since Cloudflare Workers run on the V8 engine, they use the Web native APIs.
 Bit rot.
 
-Wait but node.js also uses V8.
-    </p>
+<p>Wait but node.js also uses V8.
+</p>
+<p>First talk about how browsers do this all this just for process isolation. Also realise the browser is a messy environment that does a lot of different things 
+a lot to keep backward compatibility. 
+to protect against attacks, and then how Cloudflare kinda does similar things. They do things that are different since they run a 
+different platform that does different things but the Cloudflare. Most effective implementations against current generation attacks. Also they have a copy of
+All code running so zero days can get burned, compared to say a browser. Cloudflare has this effective multi tenant runtime. It's also the perfect platform
+To run untrusted code from any source.</p>
+
+<p>Also bundling can have negative effect on bundle size. There are single digit MB limits.
+Test how cloudflare would bundle the node.js library.</p>
+
+<p>I wanted buildless code, just slightly less complexity. Bit rot prevention, using a library makes it more likely to bit rot.</p>
+
+<p>Deno goes full build less. https://deno.com/blog/you-dont-need-a-build-step
+https://jvns.ca/blog/2023/02/16/writing-javascript-without-a-build-system/ import using CDN</p>
+
+<p>Import maps. Lit components. Node.js doesn't have isolation, so it needs a ground up implementation.  
+node.js murders v8 sandbox protections. A clean reimplementation is needed.</p>
+
+
+<p>If anyone's looking for something like a framework that works with buildless workflows you might check out the project I work on: Lit ( https://lit.dev )
+Lit gives you reactive components, declarative HTML templates, runtime encapsulated DOM and styles, interoperability with frameworks and HTML via web components, and a lot more - with no required build tools at all.</p>
+
+<p>We take great care to make sure our libraries are usable without build tools. We support plain JS (in addition to TypeScript). Our libraries work straight from CDNs like Unpkg. When installed locally you can use a dev server that rewrites bare module specifiers or use an 8-line import map to make all of our core packages importable (we carefully keep all of our import specifiers compatible with the web and compact import maps). Components are inspectable with regular DevTools. You can even write components right in DevTools, or in a script tag in plain HTML.</p>
+
+<p>I honestly wish this weren't a unique selling point of Lit, but as far as I can tell, of the "major" frameworks or component libraries out there (including React, Vue, Angular, Solid, Ember, Svelte, Stencil, Preact, and more) we're the only ones that fully work with plain JS within our regular mainstream usage patterns.
+
+ You can import directly from JS module CDNs like unpkg.com, ie:
+
+    import {LitElement, html} from 'https://unpkg.com/lit@2.6.1/index.js?module';</p>
+
+<p>How cloudflare waited 2017 to 2023, 5 years before they started implementing the Node.js runtime. It's partial, has some differences.</p>
+
+    <p>Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the
+        compiler either.
+        WinterCG but Node.js joined, and compatible, and edge functions, and was cloud front, and you can never escape
+        the wrath of node.js. it will find you, and it will eat your soul. Even the creator of node.js proclaimed their
+        hate for their creation as they embarked on their next adventure of deno, which I also have reservations about,
+        but at least they have their own version of foundation db, that allows for not just checked calls.
+
+        Web frameworks blog, js community can move fast while the platform is about breaking the least</p>
+    
+    
+    </details>
 
 <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
 
@@ -408,62 +455,17 @@ async function generatePresignedPutUrl(fileName) {
 
 Talk about sigv4
 
-First talk about how browsers do this all this just for process isolation. Also realise the browser is a messy environment that does a lot of different things 
-a lot to keep backward compatibility. 
-to protect against attacks, and then how Cloudflare kinda does similar things. They do things that are different since they run a 
-different platform that does different things but the Cloudflare. Most effective implementations against current generation attacks. Also they have a copy of
-All code running so zero days can get burned, compared to say a browser. Cloudflare has this effective multi tenant runtime. It's also the perfect platform
-To run untrusted code from any source.
-
-Also bundling can have negative effect on bundle size. There are single digit MB limits.
-Test how cloudflare would bundle the node.js library.
-
-I wanted buildless code, just slightly less complexity. Bit rot prevention, using a library makes it more likely to bit rot.
-
-Deno goes full build less. https://deno.com/blog/you-dont-need-a-build-step
-https://jvns.ca/blog/2023/02/16/writing-javascript-without-a-build-system/ import using CDN
-
-Import maps. Lit components.
 
 
-If anyone's looking for something like a framework that works with buildless workflows you might check out the project I work on: Lit ( https://lit.dev )
-Lit gives you reactive components, declarative HTML templates, runtime encapsulated DOM and styles, interoperability with frameworks and HTML via web components, and a lot more - with no required build tools at all.
-
-We take great care to make sure our libraries are usable without build tools. We support plain JS (in addition to TypeScript). Our libraries work straight from CDNs like Unpkg. When installed locally you can use a dev server that rewrites bare module specifiers or use an 8-line import map to make all of our core packages importable (we carefully keep all of our import specifiers compatible with the web and compact import maps). Components are inspectable with regular DevTools. You can even write components right in DevTools, or in a script tag in plain HTML.
-
-I honestly wish this weren't a unique selling point of Lit, but as far as I can tell, of the "major" frameworks or component libraries out there (including React, Vue, Angular, Solid, Ember, Svelte, Stencil, Preact, and more) we're the only ones that fully work with plain JS within our regular mainstream usage patterns.
-
- You can import directly from JS module CDNs like unpkg.com, ie:
-
-    import {LitElement, html} from 'https://unpkg.com/lit@2.6.1/index.js?module';
-
-How cloudflare waited 2017 to 2023, 5 years before they started implementing the Node.js runtime. It's partial, has some differences.
-
-Node.js doesn't have isolation, so it needs a ground up implementation.  
-
-add code blocks that show different sections of the 
 
 
-Processes are not secure. I just told you all the things the browser does, but then how does cloudflare run v8 isolates?
 
 After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation.
 
-The latter. .uk is a CCTLD, or Country Code Top-Level Domain; .co.uk is a subdomain thereof.
-
-Emphasising TLD means top level "domain".
-
-node.js murders v8 sandbox protections. A clean reimplementation is needed.
 
 Apparently Curl even supports SigV4, clever way of avoiding leaking secret key or replay attacks.
 
-Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the
-        compiler either.
-        WinterCG but Node.js joined, and compatible, and edge functions, and was cloud front, and you can never escape
-        the wrath of node.js. it will find you, and it will eat your soul. Even the creator of node.js proclaimed their
-        hate for their creation as they embarked on their next adventure of deno, which I also have reservations about,
-        but at least they have their own version of foundation db, that allows for not just checked calls.
 
-        Web frameworks blog, js community can move fast while the platform is about breaking the least
     </p>
 
 </div>
