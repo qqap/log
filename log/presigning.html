@@ -263,101 +263,9 @@ return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
 Yup, it does, not surprising. Let's reimplement it using the Web Crypto interface, a standardised interoperable standard, instead. Apparently Node.js has implemented the Web Crypto interface, along with other standard web platform APIs. There's even a runtime interoperability group called WinterCG with the members of Cloudflare, Deno, Node.js, Vercel, etc. to jointly try to fix the messed up runtimes.
 </p>
 
-<details><summary>Tangent</summary>
+<p>After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation, I somewhat implemented it. It's not perfect or efficient by any means. After implementing I realised that both S3 and R2 don't verify the signed hash of the object, so I'm using <code>UNSIGNED-PAYLOAD</code> here for clarity, while they hopefully resolve the regression. Hardcoded for 900 seconds timeout.</p>
 
-<p>
-
-</p><p>
-
-Node.js security problems.
-
-So web crypto is part of the web interoperability standard.
-
-Crypto streams
-
-https://blog.cloudflare.com/introducing-the-wintercg
-
-Even val.town tried using Node.js, with the vm2 module  which was someone trying to 
-
-Even Node.js, with WinterCG, has actually implemented Web Crypto? So crypto is legacy.
-
-Ryan Dahl</p>
-
-<p>
- Since Cloudflare Workers run on the V8 engine, they use the Web native APIs.
-Bit rot.
-
-<p>Wait but node.js also uses V8.
-</p>
-<p>First talk about how browsers do this all this just for process isolation. Also realise the browser is a messy environment that does a lot of different things 
-a lot to keep backward compatibility. 
-to protect against attacks, and then how Cloudflare kinda does similar things. They do things that are different since they run a 
-different platform that does different things but the Cloudflare. Most effective implementations against current generation attacks. Also they have a copy of
-All code running so zero days can get burned, compared to say a browser. Cloudflare has this effective multi tenant runtime. It's also the perfect platform
-To run untrusted code from any source.</p>
-
-<p>Also bundling can have negative effect on bundle size. There are single digit MB limits.
-Test how cloudflare would bundle the node.js library.</p>
-
-<p>I wanted buildless code, just slightly less complexity. Bit rot prevention, using a library makes it more likely to bit rot.</p>
-
-<p>Deno goes full build less. https://deno.com/blog/you-dont-need-a-build-step
-https://jvns.ca/blog/2023/02/16/writing-javascript-without-a-build-system/ import using CDN</p>
-
-<p>Import maps. Lit components. Node.js doesn't have isolation, so it needs a ground up implementation.  
-node.js murders v8 sandbox protections. A clean reimplementation is needed.</p>
-
-
-<p>If anyone's looking for something like a framework that works with buildless workflows you might check out the project I work on: Lit ( https://lit.dev )
-Lit gives you reactive components, declarative HTML templates, runtime encapsulated DOM and styles, interoperability with frameworks and HTML via web components, and a lot more - with no required build tools at all.</p>
-
-<p>We take great care to make sure our libraries are usable without build tools. We support plain JS (in addition to TypeScript). Our libraries work straight from CDNs like Unpkg. When installed locally you can use a dev server that rewrites bare module specifiers or use an 8-line import map to make all of our core packages importable (we carefully keep all of our import specifiers compatible with the web and compact import maps). Components are inspectable with regular DevTools. You can even write components right in DevTools, or in a script tag in plain HTML.</p>
-
-<p>I honestly wish this weren't a unique selling point of Lit, but as far as I can tell, of the "major" frameworks or component libraries out there (including React, Vue, Angular, Solid, Ember, Svelte, Stencil, Preact, and more) we're the only ones that fully work with plain JS within our regular mainstream usage patterns.
-
- You can import directly from JS module CDNs like unpkg.com, ie:
-
-    import {LitElement, html} from 'https://unpkg.com/lit@2.6.1/index.js?module';</p>
-
-<p>How cloudflare waited 2017 to 2023, 5 years before they started implementing the Node.js runtime. It's partial, has some differences.</p>
-
-    <p>Not the most efficient implementation, especially since it's javascript, it's not getting optimised by the
-        compiler either.
-        WinterCG but Node.js joined, and compatible, and edge functions, and was cloud front, and you can never escape
-        the wrath of node.js. it will find you, and it will eat your soul. Even the creator of node.js proclaimed their
-        hate for their creation as they embarked on their next adventure of deno, which I also have reservations about,
-        but at least they have their own version of foundation db, that allows for not just checked calls.
-
-        Web frameworks blog, js community can move fast while the platform is about breaking the least</p>
-    
-    
-    </details>
-
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-
-
-    <pre>
-<code>async function HMAC(key, message){
-	if (typeof key === 'string') { key = toByteArray(key); }
-	if (typeof message === 'string') { message = toByteArray(message); }
-	return await crypto.subtle.sign('HMAC', 
-        await crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: 'SHA-256' }, true, ['sign']), 
-        message);
-}
-
-function toHexString(byteArray) {
-    return Array.from(new Uint8Array(byteArray)).map(b => b.toString(16).padStart(2, '0')).join('')
-}
-
-function toByteArray(str) {
-    var byteArray = new Uint8Array(str.length);
-    for (var i = 0; i < str.length; i++) {
-        byteArray[i] = str.charCodeAt(i);
-    }
-    return byteArray;
-}
-
-async function generatePresignedPutUrl(fileName) {
+<pre><code>async function generatePresignedPutUrl(fileName) {
 
     const date = new Date();
     const dateIso = date.toISOString().replace(/:/g, "").replace(/-/g, "").replace(/\./g, "").slice(0, -4) + "Z";
@@ -370,10 +278,9 @@ async function generatePresignedPutUrl(fileName) {
     const service = "s3"
 
     const canonicalHeaders = "host:" + url 
-	const queryParams = "X-Amz-Algorithm=AWS4-HMAC-SHA256" + "&X-Amz-Content-Sha256=" + 
-        "UNSIGNED-PAYLOAD" + "&X-Amz-Credential=" + accessKey + "%2F" + dateShort + "%2F" 
-        + region + "%2F" + service + "%2Faws4_request" + "&X-Amz-Date=" 
-        + dateIso + "&X-Amz-Expires=900&X-Amz-SignedHeaders=host&x-id=PutObject"
+	const queryParams = "X-Amz-Algorithm=AWS4-HMAC-SHA256" + "&X-Amz-Content-Sha256=" + "UNSIGNED-PAYLOAD" 
+	+ "&X-Amz-Credential=" + accessKey + "%2F" + dateShort + "%2F" + region + "%2F" + service + "%2Faws4_request" 
+	+ "&X-Amz-Date=" + dateIso + "&X-Amz-Expires=900&X-Amz-SignedHeaders=host&x-id=PutObject"
    
     const canonicalRequest = "PUT" + "\n" +
         "/" + fileName + "\n" +
@@ -401,20 +308,7 @@ async function generatePresignedPutUrl(fileName) {
 </code></pre>
 
     <p>
-
-Talk about sigv4
-
-
-
-
-
-
-After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation.
-
-
-Apparently Curl even supports SigV4, clever way of avoiding leaking secret key or replay attacks.
-
-
+    So this uses the SigV4 technique for signing the requests, with a signing key created using the secret key, and the request as the string to sign. This prevents the key from being exposed, the request being reused, and data tampering in transit. Curl supports SigV4.
     </p>
 
 </div>
