@@ -260,15 +260,26 @@ Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>. Seems mys
 return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
       
    <p>
-Yup, it does, not surprising. Let's reimplement it using the native Web Crypto interface.
+Yup, it does, not surprising. Let's reimplement it using the Web Crypto interface, a standardised interoperable standard, instead. Apparently Node.js has implemented the Web Crypto interface, along with other standard web platform APIs. There's even a runtime interoperability group called WinterCG with the members of Cloudflare, Deno, Node.js, Vercel, etc. to jointly try to fix the messed up runtimes.
 </p>
 
 <details><summary>Tangent</summary>
 
-<p>So why do we care to use the Web native APIs? Cloudflare started partially implementing Node.js APIs from scratch a few years after introducing Workers, clearly there is a market for Node.js. Plus, isn't 
+<p>
 
-val.town seemed tried to use vm2 which was someone trying to 
+</p><p>
 
+Node.js security problems.
+
+So web crypto is part of the web interoperability standard.
+
+Crypto streams
+
+https://blog.cloudflare.com/introducing-the-wintercg
+
+Even val.town tried using Node.js, with the vm2 module  which was someone trying to 
+
+Even Node.js, with WinterCG, has actually implemented Web Crypto? So crypto is legacy.
 
 Ryan Dahl</p>
 
