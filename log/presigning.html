@@ -260,7 +260,7 @@ Import <code>@aws-sdk</code> and then call <code> getSignedUrl</code>. Seems mys
 return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
       
    <p>
-Yup, it does, not surprising. Let's reimplement it using the Web Crypto interface, a standardised interoperable standard, instead. Apparently Node.js has implemented the Web Crypto interface, along with other standard web platform APIs. There's even a runtime interoperability group called WinterCG with the members of Cloudflare, Deno, Node.js, Vercel, etc. to jointly try to fix the messed up runtimes.
+Yup, it does, not surprising. Let's reimplement it using the Web Crypto interface, a standardised interoperable standard, instead. Apparently Node.js has implemented the Web Crypto interface, along with other standard web platform APIs as well. There's even a runtime interoperability group called WinterCG with the members of Cloudflare, Deno, Vercel, and you guessed it  Node.js, to jointly try to fix the messed up runtimes.
 </p>
 
 <p>After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation, I somewhat implemented it. It's not perfect or efficient by any means. After implementing I realised that both S3 and R2 don't verify the signed hash of the object, so I'm using <code>UNSIGNED-PAYLOAD</code> here for clarity, while they hopefully resolve the regression. Hardcoded for 900 seconds timeout.</p>
