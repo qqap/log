@@ -7,7 +7,7 @@ componentDiagram {
 </style>
 
 
-node browser as b #darkkhaki
+node browser as b #honeydew
 cloud worker as w #cornsilk
 database bucket as bu #cornsilk
 

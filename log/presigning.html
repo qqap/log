@@ -171,35 +171,62 @@
         Ok, not entirely true, but it's a good way to get the point across. Mobile devices that are a bit more resource
         constrained are somewhat isolated, with several heuristics used, such as sites that are most likely to have
         user-specific information. 
-        Also, 'same-site' doesn't mean 'same-origin'. since you can technically modify <code>document.domain</code> for
-        relaxing the same-origin policy.
-</p>
-<p>
+        </p>
 
-What does modifying <code>document.domain</code> do? It allows you to effectively modify the origin at runtime, with the side-effect of making it an unreliable metric to cluster tabs. Why is it there? By allowing a few subdomains to say they are part of the same superdomain, they can easily communicate by 'relaxing' the same-origin hostname where an origin is a complete protocol + hostname + port. Of course, there are weird holes with this approach as you can feel, so Chromium is trying to get rid of it.
-</p>
+        <p>
+        So I just said that they are grouped as same-sites. That's since same-origin is defined differently.</p>
 
-	<p>Apparently something called eTLDs. Some sample registered eTLDs are</p>
+<pre><code class="markdown"># Origin:
 
-<pre><code class="language-plaintext">github.io, blogspot.com, co.uk, blob.core.windows.net, ngrok.app, fool.jp, boyfriend.jp</code></pre>
+https://www.example.co.uk:443
+------ ------------------ ---
+Scheme + Hostname [FQDN] + Port
+
+# Site:
+
+https://www.example.co.uk:443
+------      -------------
+Scheme   +    eTLD+1 </code></pre>
+
+
+
+
+	<p>What's eTLDs? They are subdomains that associated with the TLD act as if they are a separate TLD.
+	</p>
+	
+	<pre><code class="markdown"># TLD
+
+top level domain 
+.com, .org, .uk, .us
+
+# eTLD 
+
+effective top level domain 
+.com, .github.io, .blogspot.com, .co.uk, .blob.core.windows.net, .ngrok.app, .fool.jp, .boyfriend.jp
+</code></pre>
        
     <p>
-	All domains for which subdomains are widely distributed, except maybe the last two. Now they all are treated as separate sites. You might have noticed that <code>co.uk</code> is also there? Yes, it's also a eTLD, the TLD for it is <code>.uk</code>. In fact, <code>.uk</code> wasn't allowed to be registered directly until 2014, no wonder <code>co.uk</code> is so popular.
+	If you see the examples for eTLDs, you see domains for which subdomains are widely distributed. You might have noticed that <code>co.uk</code> is also there? Yes, it's also a eTLD, the TLD for it is <code>.uk</code>. In fact, <code>.uk</code> wasn't allowed to be registered directly until 2014, no wonder <code>co.uk</code> is so popular.
 
    </p>
+   
+   <p>
+
+So, why not use same-origin isolation instead? Apparently a Web API called <code>document.domain</code> allows you to effectively modify the origin at runtime, with the side-effect of making it an unreliable metric to cluster tabs. Why is it there? By allowing a few subdomains to say they are part of the same superdomain, they can easily communicate by relaxing the same-origin policy. Of course, there are weird holes with this approach, so Chromium is trying to get rid of it.
+</p>
+   
  <p>
-Webkit follows a simple one process per tab model, where two webpages are never
+Webkit just follows a simple one process per tab model instead of dealing with these wacky definitions, where two webpages are never
         consolidated into the same rendering process, even
         under high memory pressure and even if they share an eTLD+1 in
-        their URLs. Instead, Safari spawns a new rendering process for each
+        their URLs. Instead, Webkit spawns a new rendering process for each
         tab until the system runs out of memory.
 
    </p>
 
-  
-
     <p>
-        Ok, that was quite a tangent, but you learned something new! Hopefully.
+    It seems like the browsers don't think that believe that running multiple untrusted tabs in the same process is a good idea? Yes, to mitigate against timing attacks such as Spectre, they rely on the security of processes in the OS instead. So I guess the question is, how does Cloudflare manage to keep 
+    
     </p>
 
     <p>
@@ -286,7 +313,7 @@ Webkit follows a simple one process per tab model, where two webpages are never
     </p>
 
     <p>
-        I better get to implementing the logic to generating this magical URL. Ok, so Cloudflare provides some documentation, curtesy of Kian. 
+        I better get to implementing the logic to generating this magical URL. Cloudflare fortunately provides some documentation, courtesy of Kian. 
     </p>
 
     <pre>
@@ -305,6 +332,7 @@ return this.getSigv4aSigner().sign(requestToSign, options);</code></pre>
       
    <p>
 Yup, it does. Not suprising. Since Cloudflare Workers run on the V8 engine, they use the Web native APIs.
+Bit rot.
 
 Wait but node.js also uses V8.
     </p>
@@ -339,9 +367,9 @@ async function generatePresignedPutUrl(fileName) {
     const dateIso = date.toISOString().replace(/:/g, "").replace(/-/g, "").replace(/\./g, "").slice(0, -4) + "Z";
     const dateShort = dateIso.split("T")[0];
 
-    const url = "«bucketname.accountid.r2.cloudflarestorage.com»"
-    const accessKey = "«accesskey»"
-    const secretAccessKey = "«secretaccesskey»"
+    const url = "&ltbucketname.accountid.r2.cloudflarestorage.com&gt"
+    const accessKey = "&ltaccesskey&gt"
+    const secretAccessKey = "&ltsecretaccesskey&gt"
     const region = "auto"
     const service = "s3"
 
@@ -380,9 +408,49 @@ async function generatePresignedPutUrl(fileName) {
 
 Talk about sigv4
 
+First talk about how browsers do this all this just for process isolation. Also realise the browser is a messy environment that does a lot of different things 
+a lot to keep backward compatibility. 
+to protect against attacks, and then how Cloudflare kinda does similar things. They do things that are different since they run a 
+different platform that does different things but the Cloudflare. Most effective implementations against current generation attacks. Also they have a copy of
+All code running so zero days can get burned, compared to say a browser. Cloudflare has this effective multi tenant runtime. It's also the perfect platform
+To run untrusted code from any source.
+
+Also bundling can have negative effect on bundle size. There are single digit MB limits.
+Test how cloudflare would bundle the node.js library.
+
+I wanted buildless code, just slightly less complexity. Bit rot prevention, using a library makes it more likely to bit rot.
+
+Deno goes full build less. https://deno.com/blog/you-dont-need-a-build-step
+https://jvns.ca/blog/2023/02/16/writing-javascript-without-a-build-system/ import using CDN
+
+Import maps. Lit components.
+
+
+If anyone's looking for something like a framework that works with buildless workflows you might check out the project I work on: Lit ( https://lit.dev )
+Lit gives you reactive components, declarative HTML templates, runtime encapsulated DOM and styles, interoperability with frameworks and HTML via web components, and a lot more - with no required build tools at all.
+
+We take great care to make sure our libraries are usable without build tools. We support plain JS (in addition to TypeScript). Our libraries work straight from CDNs like Unpkg. When installed locally you can use a dev server that rewrites bare module specifiers or use an 8-line import map to make all of our core packages importable (we carefully keep all of our import specifiers compatible with the web and compact import maps). Components are inspectable with regular DevTools. You can even write components right in DevTools, or in a script tag in plain HTML.
+
+I honestly wish this weren't a unique selling point of Lit, but as far as I can tell, of the "major" frameworks or component libraries out there (including React, Vue, Angular, Solid, Ember, Svelte, Stencil, Preact, and more) we're the only ones that fully work with plain JS within our regular mainstream usage patterns.
+
+ You can import directly from JS module CDNs like unpkg.com, ie:
+
+    import {LitElement, html} from 'https://unpkg.com/lit@2.6.1/index.js?module';
+
+How cloudflare waited 2017 to 2023, 5 years before they started implementing the Node.js runtime. It's partial, has some differences.
+
+Node.js doesn't have isolation, so it needs a ground up implementation.  
+
+add code blocks that show different sections of the 
+
+
 Processes are not secure. I just told you all the things the browser does, but then how does cloudflare run v8 isolates?
 
 After going through countless abstraction layers, and weirdly vague yet highly specific AWS documentation.
+
+The latter. .uk is a CCTLD, or Country Code Top-Level Domain; .co.uk is a subdomain thereof.
+
+Emphasising TLD means top level "domain".
 
 node.js murders v8 sandbox protections. A clean reimplementation is needed.
 
