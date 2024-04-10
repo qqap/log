@@ -69,7 +69,42 @@ a:hover {
 }
 
 .main pre code {
+    width: fit-content;
+    max-width: 100%;
+    float: left;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+
+    @media (pointer:none), (pointer:coarse) {
+        float: none;
+        width: auto;
+        margin: auto;
+    }
+
+    /* margin-right: 1rem; */
     border-radius: 1rem;
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none; /* Firefox */
+}
+
+.main svg {
+    /* padding-left: 15vi; */
+    padding-right: 15vi;
+
+    @media (pointer:none), (pointer:coarse) {
+        padding-left: 2vi;
+        padding-right: 2vi;
+    }
+
+    width: fit-content;
+    max-width: 100%;
+    float: right;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+
+    @media (pointer:none), (pointer:coarse) {
+        float: none;
+        width: auto;
+        margin: auto;
+    }
 }

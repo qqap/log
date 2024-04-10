@@ -28,10 +28,9 @@
         locked to documents from a single site.</p>
 
 
-    <p>
         <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none"
-            style="width:min(90%, 600px)" version="1.1" viewBox="0 0 633 273" zoomAndPan="magnify">
+            style="width:min(60%, 500px)" version="1.1" viewBox="0 0 633 273" zoomAndPan="magnify">
             <defs />
             <g>
                 <g id="cluster_##2">
@@ -169,7 +168,6 @@
                 <!--SRC=[ZP1DYi9048NtVOeYhWMDlukGZOivm9oWaYx6fjkgK1Ld4F7kfgCC3Wp1tUllQnwFiXYuGyKJi7Wowc2vSFOB5JbcM2xS2yrVuUe06b5FUf0a2XzAn9bX6xzKpkn7NbN1965FTGqUDSOZnk1kpeqbiwCmNJpz37KFqgcqP0QpLfGjf0XNUAhYUr_0Iz__5D20omctcd3hlEpla05tvJjpneBDXDjEk9rBs522uXDF11PwWXuRAx9Coxmgdsm3rJm_UJk4Hzezqnq0]-->
             </g>
         </svg>
-    </p>
 
     <p>
         Ok, not entirely true, but it's a good way to get the point across. Mobile devices that are a bit more resource
@@ -178,7 +176,7 @@
         </p>
 
         <p>
-        So I just said that they are grouped as same-sites. That's since origin is defined differently.</p>
+        So, I just said that they are grouped as same-sites. That's because origins are a bit different. Origin is defined to include scheme, hostname and port, while site only means scheme and eTLD+1.</p>
 
 <pre><code class="markdown"># Origin:
 
@@ -195,22 +193,8 @@ Scheme   +    eTLD+1 </code></pre>
 
 
 
-	<p>What's eTLDs? They are subdomains that associated with the TLD act as if they are a separate TLD.
+	<p>What are eTLDs? They are subdomains that associated with the TLD that act as if they effectively a TLD by itself. One example of an eTLD is <code>co.uk</code>, where <code>co</code> is a subdomain for the <code>.uk</code> TLD. In fact, <code>.uk</code> wasn't allowed to be registered directly until 2014, no wonder <code>co.uk</code> is so popular.
 	</p>
-	
-	<pre><code class="markdown"># TLD
-
-top level domain 
-.com, .org, .uk, .us
-
-# eTLD 
-
-effective top level domain 
-.com, .github.io, .blogspot.com, .co.uk, .blob.core.windows.net, .ngrok.app, .fool.jp, .boyfriend.jp
-</code></pre>
-       
-    <p>
-	If you see the examples for eTLDs, you see domains for which subdomains are widely distributed. You might have noticed that <code>co.uk</code> is also there? Yes, it's also a eTLD, the TLD for it is <code>.uk</code>. In fact, <code>.uk</code> wasn't allowed to be registered directly until 2014, no wonder <code>co.uk</code> is so popular.
 
    </p>
    
@@ -233,6 +217,8 @@ Webkit just follows a simple one process per tab model instead of dealing with t
    </p>
    </details>
 
+   
+
     <p>
         Cloudflare loves to advertise to use Workers for everything, so they suggest just route all requests to a Worker
         and let it firewall access to your bucket.
@@ -240,76 +226,81 @@ Webkit just follows a simple one process per tab model instead of dealing with t
         allowing to upload larger sized content, a few GB.
     </p>
 
+    <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none"
+    style="width:min(60%, 400px)" version="1.1" viewBox="0 0 452 193" zoomAndPan="magnify">
+    <defs />
+    <g><!--entity b-->
+        <g id="elem_b">
+            <polygon fill="#BDB76B"
+                points="16,16.5474,26,6.5474,112,6.5474,112,42.8443,102,52.8443,16,52.8443,16,16.5474"
+                style="stroke:#008000;stroke-width:0.5;" />
+            <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="112" y1="16.5474" y2="6.5474" />
+            <line style="stroke:#008000;stroke-width:0.5;" x1="16" x2="102" y1="16.5474" y2="16.5474" />
+            <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="102" y1="16.5474" y2="52.8443" /><text
+                fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56"
+                x="31" y="39.5425">browser</text>
+        </g><!--entity w-->
+        <g id="elem_w">
+            <path
+                d="M366.5519,15.8418 C369.969,8.0668 377.3903,7.6601 382.0735,14.4969 C385.1356,6.3593 392.9694,6 398.2037,12.0224 C404.4696,6.2643 410.5106,6.1979 414.1512,14.9148 C418.4041,9.6329 424.1846,9.3208 427.7813,15.6828 C436.7057,18.0682 437.9855,25.452 431.6911,31.5803 C438.2176,36.329 437.6035,43.1345 429.6648,45.8257 C425.8144,54.6486 419.6532,55.9489 412.4888,49.57 C409.6882,58.0357 404.7851,59.6439 397.5675,54.3653 C390.7822,61.5314 385.2959,59.5856 382.32,50.7382 C376.0581,56.0231 370.4936,53.3587 368.6797,45.9561 C359.9692,45.2154 357.1135,38.1664 362.1478,31.3 C355.3321,24.5895 357.8992,18.1453 366.5519,15.8418 "
+                fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
+                font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="47" x="373.5"
+                y="34.5425">worker</text>
+        </g><!--entity bu-->
+        <g id="elem_bu">
+            <path
+                d="M30,139.8374 C30,129.8374 64,129.8374 64,129.8374 C64,129.8374 98,129.8374 98,139.8374 L98,165.1343 C98,175.1343 64,175.1343 64,175.1343 C64,175.1343 30,175.1343 30,165.1343 L30,139.8374 "
+                fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" />
+            <path d="M30,139.8374 C30,149.8374 64,149.8374 64,149.8374 C64,149.8374 98,149.8374 98,139.8374 "
+                fill="none" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
+                font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="48" x="40"
+                y="166.8325">bucket</text>
+        </g><!--link b to w-->
+        <g id="link_b_w">
+            <path d="M112.42,29.6874 C178.98,29.6874 291.42,29.6874 352.38,29.6874 " fill="none" id="b-to-w"
+                style="stroke:#008000;stroke-width:1.0;" />
+            <polygon fill="#008000"
+                points="358.38,29.6874,349.38,25.6874,353.38,29.6874,349.38,33.6874,358.38,29.6874"
+                style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                font-size="13" lengthAdjust="spacing" textLength="210" x="130.25" y="22.7543">Requests
+                pre-signed URL for PUT</text>
+        </g><!--link w to b-->
+        <g id="link_w_b">
+            <path
+                d="M358.1,43.6774 C349.53,46.1774 340.42,48.3974 331.75,49.6874 C289.33,56.0474 181.27,55.2874 138.75,49.6874 C130.09,48.5574 126.839,48.1296 118.109,45.9996 "
+                fill="none" id="w-to-b" style="stroke:#008000;stroke-width:1.0;" />
+            <polygon fill="#008000"
+                points="112.28,44.5774,120.0754,50.5967,117.1375,45.7626,121.9716,42.8247,112.28,44.5774"
+                style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                font-size="13" lengthAdjust="spacing" textLength="191" x="139.75" y="45.7543">Sends pre-signed
+                URL for PUT</text>
+        </g><!--link b to bu-->
+        <g id="link_b_bu">
+            <path d="M64,53.1274 C64,74.9674 64,101.9274 64,123.5774 " fill="none" id="b-to-bu"
+                style="stroke:#008000;stroke-width:1.0;" />
+            <polygon fill="#008000" points="64,129.5774,68,120.5774,64,124.5774,60,120.5774,64,129.5774"
+                style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
+                font-size="13" lengthAdjust="spacing" textLength="155" x="73" y="95.9043">PUT with pre-signed
+                URL</text>
+        </g>
+        <!--SRC=[ZOwxRW8n44Nx-OehKIDwjDecI3GK4G6bzcF2MbuyP6pBYgByExj9Yh1LwdlEcUbo-HYv9oVNcoHEPHVCHSqLdmGSGk8d6KMnL-P4NzHjVdcY99vXLLfcXScmM7cZCGuc1dAZL8yc6d_6XfKJJJcCaRmfnfeyoTL5Bjzk_REJnRgVZ2qwDn_VlWwXS7_azygvPDoKrpbS4dkSZmUyJUyzdqyFBBKvOPU95qx-V_xqmXoeom9c52sKOP5veEu0]-->
+    </g>
+</svg>
+
     <p>
         What if there is some way to directly allow the third party person to access operating on R2 without a middle
-        person? Voila, it's called pre-signed URLs, a URL that provides temporary
-        access to a resource. Where do you get the URL? You create one with some cryptographic magic. I can use the Worker
+        person? Voila, it's called pre-signed URLs, a URL that provides temporary access to a resource. 
+    </p>
+
+<p>
+
+
+        Where do you get the URL? You create one with some cryptographic magic. I can use the Worker
         to create the pre-signed URL, so that if someone wants to PUT some object into my code they can call the Worker and get the URL to upload to the bucket directly.
     </p>
 
-    <p>
-        <?xml version="1.0" encoding="us-ascii" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" preserveAspectRatio="none"
-            style="width:min(80%, 400px)" version="1.1" viewBox="0 0 452 193" zoomAndPan="magnify">
-            <defs />
-            <g><!--entity b-->
-                <g id="elem_b">
-                    <polygon fill="#BDB76B"
-                        points="16,16.5474,26,6.5474,112,6.5474,112,42.8443,102,52.8443,16,52.8443,16,16.5474"
-                        style="stroke:#008000;stroke-width:0.5;" />
-                    <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="112" y1="16.5474" y2="6.5474" />
-                    <line style="stroke:#008000;stroke-width:0.5;" x1="16" x2="102" y1="16.5474" y2="16.5474" />
-                    <line style="stroke:#008000;stroke-width:0.5;" x1="102" x2="102" y1="16.5474" y2="52.8443" /><text
-                        fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="56"
-                        x="31" y="39.5425">browser</text>
-                </g><!--entity w-->
-                <g id="elem_w">
-                    <path
-                        d="M366.5519,15.8418 C369.969,8.0668 377.3903,7.6601 382.0735,14.4969 C385.1356,6.3593 392.9694,6 398.2037,12.0224 C404.4696,6.2643 410.5106,6.1979 414.1512,14.9148 C418.4041,9.6329 424.1846,9.3208 427.7813,15.6828 C436.7057,18.0682 437.9855,25.452 431.6911,31.5803 C438.2176,36.329 437.6035,43.1345 429.6648,45.8257 C425.8144,54.6486 419.6532,55.9489 412.4888,49.57 C409.6882,58.0357 404.7851,59.6439 397.5675,54.3653 C390.7822,61.5314 385.2959,59.5856 382.32,50.7382 C376.0581,56.0231 370.4936,53.3587 368.6797,45.9561 C359.9692,45.2154 357.1135,38.1664 362.1478,31.3 C355.3321,24.5895 357.8992,18.1453 366.5519,15.8418 "
-                        fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
-                        font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="47" x="373.5"
-                        y="34.5425">worker</text>
-                </g><!--entity bu-->
-                <g id="elem_bu">
-                    <path
-                        d="M30,139.8374 C30,129.8374 64,129.8374 64,129.8374 C64,129.8374 98,129.8374 98,139.8374 L98,165.1343 C98,175.1343 64,175.1343 64,175.1343 C64,175.1343 30,175.1343 30,165.1343 L30,139.8374 "
-                        fill="#FFF8DC" style="stroke:#008000;stroke-width:0.5;" />
-                    <path d="M30,139.8374 C30,149.8374 64,149.8374 64,149.8374 C64,149.8374 98,149.8374 98,139.8374 "
-                        fill="none" style="stroke:#008000;stroke-width:0.5;" /><text fill="#000000"
-                        font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="48" x="40"
-                        y="166.8325">bucket</text>
-                </g><!--link b to w-->
-                <g id="link_b_w">
-                    <path d="M112.42,29.6874 C178.98,29.6874 291.42,29.6874 352.38,29.6874 " fill="none" id="b-to-w"
-                        style="stroke:#008000;stroke-width:1.0;" />
-                    <polygon fill="#008000"
-                        points="358.38,29.6874,349.38,25.6874,353.38,29.6874,349.38,33.6874,358.38,29.6874"
-                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
-                        font-size="13" lengthAdjust="spacing" textLength="210" x="130.25" y="22.7543">Requests
-                        pre-signed URL for PUT</text>
-                </g><!--link w to b-->
-                <g id="link_w_b">
-                    <path
-                        d="M358.1,43.6774 C349.53,46.1774 340.42,48.3974 331.75,49.6874 C289.33,56.0474 181.27,55.2874 138.75,49.6874 C130.09,48.5574 126.839,48.1296 118.109,45.9996 "
-                        fill="none" id="w-to-b" style="stroke:#008000;stroke-width:1.0;" />
-                    <polygon fill="#008000"
-                        points="112.28,44.5774,120.0754,50.5967,117.1375,45.7626,121.9716,42.8247,112.28,44.5774"
-                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
-                        font-size="13" lengthAdjust="spacing" textLength="191" x="139.75" y="45.7543">Sends pre-signed
-                        URL for PUT</text>
-                </g><!--link b to bu-->
-                <g id="link_b_bu">
-                    <path d="M64,53.1274 C64,74.9674 64,101.9274 64,123.5774 " fill="none" id="b-to-bu"
-                        style="stroke:#008000;stroke-width:1.0;" />
-                    <polygon fill="#008000" points="64,129.5774,68,120.5774,64,124.5774,60,120.5774,64,129.5774"
-                        style="stroke:#008000;stroke-width:1.0;" /><text fill="#FFFFFF" font-family="sans-serif"
-                        font-size="13" lengthAdjust="spacing" textLength="155" x="73" y="95.9043">PUT with pre-signed
-                        URL</text>
-                </g>
-                <!--SRC=[ZOwxRW8n44Nx-OehKIDwjDecI3GK4G6bzcF2MbuyP6pBYgByExj9Yh1LwdlEcUbo-HYv9oVNcoHEPHVCHSqLdmGSGk8d6KMnL-P4NzHjVdcY99vXLLfcXScmM7cZCGuc1dAZL8yc6d_6XfKJJJcCaRmfnfeyoTL5Bjzk_REJnRgVZ2qwDn_VlWwXS7_azygvPDoKrpbS4dkSZmUyJUyzdqyFBBKvOPU95qx-V_xqmXoeom9c52sKOP5veEu0]-->
-            </g>
-        </svg>
-    </p>
+  
 
     <p>
         I better get to implementing the logic to generating this magical pre-signed URL. Cloudflare fortunately provides some documentation, courtesy of Kian. 
