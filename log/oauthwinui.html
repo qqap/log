@@ -27,36 +27,35 @@ If you know anything about Microsoft, they created many frameworks that are esse
 I first created a OAuth Client ID so that I can create the authorisation request for my app. Google cloud console had iOS, Android, UWP, etc. but no WinUI3 template, so I had to use iOS to set I up. I set the bundle ID as <code>appname.oauth2</code> and then got a Client ID. I also changed the <code>Package.appxmanifest</code> to declare the protocol I just defined. 
 </p>
 
-<p>The URL would now be in the form <code>appname.oauth2:/oauth2redirect?...</code>. I just need to figure out how to receive this. I created a <code>Program.cs</code> file, the entry point of an application, that redirects the <code>ActivatedEventArgs</code> to the primary app instance.
+<p>The URL would now be in the form <code>appname.oauth2:/oauth2redirect?...</code>. I just need to figure out how to receive this. I created a <code>Program.cs</code> file, the entry point of an app, that redirects the <code>ActivatedEventArgs</code> to the primary app instance.
 </p>
 
 <pre ><code>class program {
 
     [STAThread]
     static int Main(string[] args) {
+
         WinRT.ComWrappersSupport.InitializeComWrappers();
         
-        if (DecideRedirection().Result) {
-            Microsoft.UI.Xaml.Application.Start((p) => {
-                var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
-                SynchronizationContext.SetSynchronizationContext(context);
-                new App();
-            });
-        }
+        if (DecideRedirection().Result) { return 0; }
+        
+        Microsoft.UI.Xaml.Application.Start((p) => {
+            SynchronizationContext.SetSynchronizationContext(
+                new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread()));
+                
+            new App();
+        });
 
         return 0;
     }
 
     private async static Task<bool> DecideRedirection() {
-        AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
-        AppInstance keyInstance = AppInstance.FindOrRegisterForKey("main");
 
-        if (!keyInstance.IsCurrent) {
-            await keyInstance.RedirectActivationToAsync(args);
-            return true;
-        }
-        
-        return false;
+        AppInstance keyInstance = AppInstance.FindOrRegisterForKey("main");
+        if (keyInstance.IsCurrent) { return false; }
+        await keyInstance.RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs());
+
+        return true;
     }
 }</code></pre>
 
