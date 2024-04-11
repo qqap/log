@@ -36,7 +36,6 @@ a:hover {
 .main h1 {
     padding-left: 20vi;
     padding-right: 20vi;
-    overflow-y: scroll;
 
     margin: auto;
     padding-top: 60px;
