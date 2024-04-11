@@ -22,6 +22,17 @@ a:hover {
     color: rgb(210, 210, 210);
 }
 
+.main {
+
+    @media (min-width: 75rem) {
+        width: 60rem;
+        margin: auto;
+
+      
+        /* align-self: center; */
+    }
+}
+
 .main h1 {
     padding-left: 20vi;
     padding-right: 20vi;
@@ -34,6 +45,13 @@ a:hover {
         padding-left: 5vi;
         padding-right: 5vi;
     }
+
+    @media (min-width: 75rem) {
+        padding-left: 5rem;
+        padding-right: 5rem;
+      
+        /* align-self: center; */
+    }
 }
 
 .main p, .main summary {
@@ -43,6 +61,14 @@ a:hover {
     @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 5vi;
         padding-right: 5vi;
+    }
+
+
+    @media (min-width: 75rem) {
+        padding-left: 5rem;
+        padding-right: 5rem;
+      
+        /* align-self: center; */
     }
 }
 
@@ -61,6 +87,14 @@ a:hover {
     @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 2vi;
         padding-right: 2vi;
+    }
+
+
+    @media (min-width: 75rem) {
+        padding-left: 2rem;
+        padding-right: 2rem;
+      
+        /* align-self: center; */
     }
 }
 
@@ -85,6 +119,14 @@ a:hover {
     border-radius: 1rem;
     -ms-overflow-style: none;  /* Internet Explorer 10+ */
     scrollbar-width: none; /* Firefox */
+
+
+    @media (min-width: 75rem) {
+        padding-left: 2rem;
+        padding-right: 2rem;
+      
+        /* align-self: center; */
+    }
 }
 
 .main svg {
@@ -106,5 +148,13 @@ a:hover {
         float: none;
         width: auto;
         margin: auto;
+    }
+
+
+    @media (min-width: 75rem) {
+        padding-left: 2rem;
+        padding-right: 2rem;
+
+      
     }
 }
