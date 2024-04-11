@@ -24,7 +24,7 @@ If you know anything about Microsoft, they created many frameworks that are esse
 &lt;/Extensions&gt;</code></pre>
 
 <p>
-I first created a OAuth Client ID so that I can create the authorisation request for my app. Google cloud console had iOS, Android, UWP, etc. but no WinUI3, so I had to use iOS to set I up. I set the bundle ID as <code>appname.oauth2</code> and then got a ClientID. I also changed the <code>Package.appxmanifest</code> to declare the protocol I just defined. 
+I first created a OAuth Client ID so that I can create the authorisation request for my app. Google cloud console had iOS, Android, UWP, etc. but no WinUI3 template, so I had to use iOS to set I up. I set the bundle ID as <code>appname.oauth2</code> and then got a Client ID. I also changed the <code>Package.appxmanifest</code> to declare the protocol I just defined. 
 </p>
 
 <p>The URL would now be in the form <code>appname.oauth2:/oauth2redirect?...</code>. I just need to figure out how to receive this. I created a <code>Program.cs</code> file, the entry point of an application, that redirects the <code>ActivatedEventArgs</code> to the primary app instance.
