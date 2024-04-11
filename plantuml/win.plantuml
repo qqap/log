@@ -19,7 +19,7 @@ node App.xaml.cs as a #cornsilk
 
 lp -> b : <color:Black>LaunchUri for authorizationRequest<color:Black>
 b -[dashed]> p : <color:white> Invoked by declared \n<color:white>URL protocol<color:white>
-p -[dashed]> a : <color:Black> RedirectActivationToAsync to primary AppInstance<color:Black>
+p -[dashed]> a : <color:Black> RedirectActivation to primary AppInstance<color:Black>
 a --[dashed]> lp : <color:Black> Enqueue Navigate request \n<color:Black>in DispatcherQueue<color:Black>
 
 
