@@ -160,7 +160,7 @@ code {
     max-width: 100%;
     float: right;
     margin-bottom: 1rem;
-    margin-left: 1rem;
+    /* margin-left: 1rem; */
 
     @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         float: none;

@@ -1,0 +1,3 @@
+textLength="(\d+)"
+
+replace all occurrences of the following regex with nothing.
