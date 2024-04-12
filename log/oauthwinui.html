@@ -65,7 +65,7 @@ I first created a OAuth Client ID so that I can create the authorisation request
 <p>
 Unlike UWP where they had proper activation and lifecycle management, WinUI3 is more of a manual approach.</p>
 
-<p>MainInstanceActivated is invoked when a redirection request is received, however compared to <code>OnLaunched()</code>, this isn't called on the UI thread, therefore to navigate back to the login page we need to use the <code>DispatcherQueue</code>. We also send the response Uri in the navigate request.</p>
+<p>MainInstanceActivated is invoked when a redirection request is received, however compared to <code>OnLaunched()</code>, this isn't called on the UI thread, therefore to navigate back to the login page we need to use the <code>DispatcherQueue</code>. We also unpack the response Uri from the args and send it in the navigate request.</p>
 
 <pre><code class="wide">public App() {
     
