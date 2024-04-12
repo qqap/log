@@ -37,8 +37,10 @@ a:hover {
 code {
     background-color: rgb(40, 40, 40);
     color: rgb(210, 210, 210);
-    padding-left: 0.2rem;
-    padding-right: 0.2rem;
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+    margin-left: -0.1rem;
+    margin-right: -0.1rem;
     border-radius: 0.2rem;
 
 }
@@ -93,11 +95,18 @@ code {
     padding-left: 15vi;
     padding-right: 15vi;
 
+    .wide {
+        width: 100%;
+    }
+
     @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         padding-left: 2vi;
         padding-right: 2vi;
-    }
 
+        .wide {
+            width: auto;
+        }
+    }
 
     @media (min-width: 75rem) {
         padding-left: 2rem;
