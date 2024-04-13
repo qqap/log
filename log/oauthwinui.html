@@ -110,7 +110,7 @@ private void MainInstanceActivated(object? sender, AppActivationArguments e) {
 }</code></pre>
 
 <p>Side note, you might have noticed that I explicitly call <code>WindowHelper.ShowWindow()</code>. That's since Microsoft still hasn't patched the regression of bringing the window to foreground when <code>mainInstance.Activated</code> is called.</p>
-<p>I just ended up added a separate class directly calling <code>user32.dll</code>, the core API for user interfaces, to bring the window to the foreground. The <code>0x00000009</code> is <code>SW_RESTORE</code> that activates and displays the window.</p>
+<p>I just ended up adding a separate class directly calling <code>user32.dll</code>, the core API for user interfaces, to bring the window to the foreground. The <code>0x00000009</code> is <code>SW_RESTORE</code> that activates and displays the window.</p>
 
 <p>
 The code for creating the Google Oauth request itself from the client ID, and processing it once the response is received in the login page, is easily available in Google's own documentation, so I won't be going into it.</p>
