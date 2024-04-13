@@ -187,7 +187,7 @@ code {
     /* max-width: 100%; */
     float: right;
     /* margin-bottom: 0.5rem; */
-    /* margin-left: 1rem; */
+    margin-left: 0.5rem;
 
     @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
         float: none;
