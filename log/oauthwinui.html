@@ -24,7 +24,7 @@ If you know anything about Microsoft, they created many frameworks that are esse
 &lt;/Extensions&gt;</code></pre>
 
 <p>
-I first created a OAuth Client ID so that I can create the authorisation request for my app. Google cloud console had UWP, Android, iOS, etc. but no WinUI3 template, so I had to use iOS to set I up. I set the bundle ID as <code>appname.oauth2</code>. I also changed the <code>Package.appxmanifest</code> to declare the protocol I just defined. 
+I first created a OAuth client ID so that I can create the authorisation request for my app. Google cloud console had UWP, Android, iOS, etc. but no WinUI3 template, so I had to use iOS to set I up. I set the bundle ID as <code>appname.oauth2</code>. I also changed the <code>Package.appxmanifest</code> to declare the protocol I just defined. 
 </p>
 
 <p>The URL generated from the browser after the authentication request would be in the form <code>appname.oauth2:/oauth2redirect?...</code>, I just need to figure out how to receive this. I created a <code>Program.cs</code> file, the entry point of an app, that redirects the <code>ActivatedEventArgs</code> to the primary app instance, so when the URL redirects, the Uri is received by the correct window.</p>
@@ -113,7 +113,7 @@ private void MainInstanceActivated(object? sender, AppActivationArguments e) {
 <p>I just ended up added a separate class directly calling <code>user32.dll</code>, the core API for user interfaces, to bring the window to the foreground. The <code>0x00000009</code> is <code>SW_RESTORE</code> that activates and displays the window.</p>
 
 <p>
-The code for creating the Google Oauth request itself, and processing it once the response is received in the login page, is easily available in Google's own documentation so I won't be going into it.</p>
+The code for creating the Google Oauth request itself from the client ID, and processing it once the response is received in the login page, is easily available in Google's own documentation, so I won't be going into it.</p>
 
 <p>Hv Fun!! P.S. All the code was actually written in a Windows VM on an Apple Silicon Mac</p>
 </div>

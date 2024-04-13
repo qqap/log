@@ -176,3 +176,30 @@ code {
       
     }
 }
+
+
+.main video {
+    border-radius: 0.5rem;
+
+    margin-right: 15vi;
+
+    width: fit-content;
+    /* max-width: 100%; */
+    float: right;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+
+    @media (pointer:none), (pointer:coarse), (max-width: 60rem) {
+        float: none;
+        width: auto;
+        margin-left: 5%;
+    }
+
+
+    @media (min-width: 75rem) {
+        margin-left: 2rem;
+        margin-right: 2rem;
+
+      
+    }
+}
