@@ -30,26 +30,18 @@ How to get & compile Chromium? Google has a guide. Chromium has this <code>gclie
 </p>
 
 <p>
-I somehow ended up using 100GB of storage at the end, so I deleted half of my system for this. Must be all those object files. Note that once you compile the dev build, they are a bit slow to run at times.
+I somehow ended up using 100GB of storage at the end, so I deleted half of my system for this. Must be all those object files. Note, once you compile the development build, they are a bit slow to run at times.
 </p>
 
-<video  style="width:min(80%, 500px)" muted loop src="https://media.guptaditya.com/theme.mp4" type="video/mp4" >
-</video>
+<video style="width:min(80%, 450px)" autoplay muted loop src="https://media.guptaditya.com/theme.mp4" type="video/mp4" ></video>
 
-    <script> 
-  
-        let clip = document.querySelector("video") 
-  
-        clip.addEventListener("mouseover", function (e) { 
-            clip.play(); 
-        }) 
- 
-        clip.addEventListener("mouseout", function (e) { 
-            clip.pause(); 
-        }) 
-    </script> 
+<p>After digging through the code for hours, I found a place that takes a base color and then computes the color pallete for the browser. </p>
 
-<p>After digging through the code for hours, I found this place to get the color for the <code>BrowserFrame</code> in <code>ui/views/frame/browser_frame.cc</code> and extracted the web contents from the active tab to get the theme color and return it. You also need to enable the <code>#chrome-refresh-2023</code> flag for this code to work.</p>
+<p> I tried it with some pages, here Google, YouTube, Twitter and ForTomorrow. So while Google & ForTomorrow seem similar to their page, Youtube & Twitter don't have it. I suppose this could be due to some weird color pallete computation occuring due to slightly tinted dark colors, since the logged color values seem fine.</p>
+
+<p>Note I enable the <code>#chrome-refresh-2023</code> flag for this code to work. I'm going to take a look at this deeper once the Chrome refresh code is complete, right now it's under heavy development.</p>
+
+<p>I set the color for the <code>BrowserFrame</code> in <code>ui/views/frame/browser_frame.cc</code> by extracting the web contents from the active tab to get the theme color and return it. </p>
 
 <pre><code>absl::optional<SkColor> BrowserFrame::GetUserColor() const {
 
