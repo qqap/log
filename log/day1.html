@@ -1,0 +1,64 @@
+<link rel="stylesheet" href="../style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../default.css">
+<script src="../highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+<title>Day 1 - Exit Codes</title>
+
+<div class="main">
+<h1>Day 1, Exit Codes</h1>
+
+<p>I move the supervisor call number into register <code>r16</code>, move the chosen error code
+  into the corresponding register <code>r0</code> and call the <code>svc</code> instruction. </p>
+
+  <pre><code class="asm">.global _start
+
+_start:
+  mov  x16, #1 // Setup service call 1 (exit)
+  mov  x0, #0  // param 1: 0 = normal exit  
+  svc  0       // svc{cond} #imm</code></pre>
+  <p><code>svc</code> stands for SuperVisor Call, and is in the format <code>svc{cond} #imm</code> , where <code>cond</code> is the condition code, are conditional postfixed arm instructions.
+  This improves code density and performance by reducing the number of forward branch instructions.</p>
+  <p><code>svc</code> was called <code>swi</code> SoftWare Interrupt in earlier versions of arm. <code>swi</code> instructions disassemble to <code>svc</code></p>
+  <p><code>imm</code> is the immediate value in <code>svc</code> instruction, which is ignored by the CPU. 
+  In OABI (Old ABI), <code>imm</code> is <code>0x900000 + syscall_number</code>.
+  Handler can retrieve <code>imm</code> by using stacked PC to read the <code>svc</code> instruction code.
+
+  <p>In aarch64 there are 31 64-bit general-purpose registers <code>x0-x30</code>, the bottom halves of which are accessible as <code>w0-w30</code>, while in
+    aarch32 there are 15 general-purpose registers <code>r0-r12</code>.
+  </p>
+
+
+  <pre style="float: right"><code>#define SYS_BASE 0x900000
+#define SYS_exit                   (SYS_BASE+  1)
+#define SYS_syscall                (SYS_BASE+113)</code></pre>
+  
+
+<p><code>syscall(2)</code> is an indirect system call which can used in
+  invoking a system call that has no wrapper function in the C library. It saves CPU registers before making the system call,
+  restores the registers upon return from the system call, and stores any error returned by the system call in <code>errno(3)</code></p>
+  <p>In OABI, the exit call would be  <code>svc #0x900001 @ sys_exit</code>, however implementation of syscall function is 
+  interesting since sycall gets the system call number as its argument
+  and therefore is <code>svc #0x900071</code> since <code>0x900000 + 113 == 0x900071</code>.</p>
+  <p>There are seperate arm and arm64 linux kernel trees. When exiting, the kernel also fills the information structure pointer for the parent to analyse based on the options in the wait system call.</p>
+  
+    <pre><code>int main(int argc, char **argv){
+  int val;
+  if (scanf("%d", &val) == EOF){
+    perror("scanf");
+    exit(1);
+  }
+  // printf("number %d", &val);
+  printf(".global _mymain\n"
+          "_mymain:\n\t"
+          "mov x16, #1\n\t"
+          "mov x0, #%d\n\t"
+          "svc 0\n", val);
+  return 0;
+}</code></pre>
+  
+  <p>Back to C code. I took some of the original code for 8cc, the x86 version, and created this simple program.</p>
+
+  <p>Either piping a number or running the program and entering a number, allows scanf to capture it and place it in the assembly code.</p>
+
+</div>
